@@ -31,7 +31,8 @@ from qcportal import FractalClient
 from qcportal.models.records import RecordStatusEnum
 from tqdm import tqdm
 
-N_PROCESSES = 16
+N_PROCESSES = 12
+FORCEFIELD = "openff-2.1.0.offxml"
 
 
 class InvalidCMILESFilter(CMILESResultFilter):
@@ -55,7 +56,7 @@ def _can_parameterize(smiles: str) -> Tuple[str, bool]:
             GLOBAL_TOOLKIT_REGISTRY.deregister_toolkit(toolkit)
 
         molecule = Molecule.from_smiles(smiles, allow_undefined_stereo=True)
-        force_field = ForceField("openff-1.3.0.offxml")
+        force_field = ForceField(FORCEFIELD)
 
         force_field.create_openmm_system(molecule.to_topology())
 
