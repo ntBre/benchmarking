@@ -4,12 +4,13 @@ import os
 
 import click
 import numpy
+import openmm
 from openeye import oechem
 from openff.toolkit.topology import Molecule
 from openff.toolkit.typing.engines import smirnoff
 from openff.toolkit.utils import GLOBAL_TOOLKIT_REGISTRY, OpenEyeToolkitWrapper
 from openmmforcefields.generators import GAFFTemplateGenerator
-from simtk import openmm, unit
+from simtk import unit
 from simtk.openmm.app import ForceField
 
 
