@@ -1,1 +1,3 @@
 /tmp.sqlite
+/sage/*.json
+/sage/*.sdf
