@@ -1,4 +1,5 @@
 import os
+import time
 
 import numpy
 import pandas
@@ -21,7 +22,12 @@ def main():
         )
         store = MoleculeStore.from_qcsubmit_collection(opt, "tmp.sqlite")
 
+    print("started optimizing store")
+    start = time.time()
     store.optimize_mm(force_field=ff)
+    end = time.time()
+    print(f"finished optimizing after {end - start} sec")
+
     store.get_dde(ff).to_csv("dde.csv")
     store.get_rmsd(ff).to_csv("rmsd.csv")
     store.get_tfd(ff).to_csv("tfd.csv")
