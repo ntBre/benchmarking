@@ -50,90 +50,86 @@ def run_openmm(molecule: Molecule, system: openmm.System):
 @click.option("--output", type=click.Path(exists=False, dir_okay=False))
 @click.option("--force-field-type", default="SMIRNOFF")
 def main(input_sdf, force_field, force_field_type, output):
-    input_stream = oechem.oemolistream(input_sdf)
-    output_stream = oechem.oemolostream(output)
-
     failed = False
+    with oechem.oemolistream(input_sdf) as input_stream, oechem.oemolostream(
+        output
+    ) as output_stream:
+        try:
+            for oe_molecule in input_stream.GetOEGraphMols():
+                oe_molecule = oechem.OEGraphMol(oe_molecule)
+                oechem.OE3DToInternalStereo(oe_molecule)
 
-    try:
-        for oe_molecule in input_stream.GetOEGraphMols():
-            oe_molecule = oechem.OEGraphMol(oe_molecule)
-            oechem.OE3DToInternalStereo(oe_molecule)
+                oe_data = {
+                    pair.GetTag(): pair.GetValue()
+                    for pair in oechem.OEGetSDDataPairs(oe_molecule)
+                }
 
-            oe_data = {
-                pair.GetTag(): pair.GetValue()
-                for pair in oechem.OEGetSDDataPairs(oe_molecule)
-            }
-
-            off_molecule = Molecule.from_openeye(
-                oe_molecule, allow_undefined_stereo=True
-            )
-
-            off_molecule._conformers = [
-                numpy.array(
-                    [
-                        oe_molecule.GetCoords()[i]
-                        for i in range(off_molecule.n_atoms)
-                    ]
-                )
-                * unit.angstrom
-            ]
-
-            if force_field_type.lower() == "smirnoff":
-                smirnoff_force_field = smirnoff.ForceField(
-                    force_field, allow_cosmetic_attributes=True
+                off_molecule = Molecule.from_openeye(
+                    oe_molecule, allow_undefined_stereo=True
                 )
 
-                if (
-                    "Constraints"
-                    in smirnoff_force_field.registered_parameter_handlers
-                ):
-                    smirnoff_force_field.deregister_parameter_handler(
-                        "Constraints"
+                off_molecule._conformers = [
+                    numpy.array(
+                        [
+                            oe_molecule.GetCoords()[i]
+                            for i in range(off_molecule.n_atoms)
+                        ]
+                    )
+                    * unit.angstrom
+                ]
+
+                if force_field_type.lower() == "smirnoff":
+                    smirnoff_force_field = smirnoff.ForceField(
+                        force_field, allow_cosmetic_attributes=True
                     )
 
-                omm_system = smirnoff_force_field.create_openmm_system(
-                    off_molecule.to_topology()
-                )
+                    if (
+                        "Constraints"
+                        in smirnoff_force_field.registered_parameter_handlers
+                    ):
+                        smirnoff_force_field.deregister_parameter_handler(
+                            "Constraints"
+                        )
 
-            elif force_field_type.lower() == "gaff":
-                force_field = ForceField()
+                    omm_system = smirnoff_force_field.create_openmm_system(
+                        off_molecule.to_topology()
+                    )
 
-                generator = GAFFTemplateGenerator(
-                    molecules=off_molecule, forcefield=force_field
-                )
+                elif force_field_type.lower() == "gaff":
+                    force_field = ForceField()
 
-                force_field.registerTemplateGenerator(generator.generator)
+                    generator = GAFFTemplateGenerator(
+                        molecules=off_molecule, forcefield=force_field
+                    )
 
-                omm_system = force_field.createSystem(
-                    off_molecule.to_topology().to_openmm(),
-                    nonbondedCutoff=0.9 * unit.nanometer,
-                    constraints=None,
-                )
+                    force_field.registerTemplateGenerator(generator.generator)
 
-            else:
-                raise NotImplementedError()
+                    omm_system = force_field.createSystem(
+                        off_molecule.to_topology().to_openmm(),
+                        nonbondedCutoff=0.9 * unit.nanometer,
+                        constraints=None,
+                    )
 
-            new_conformer, energy = run_openmm(off_molecule, omm_system)
+                else:
+                    raise NotImplementedError()
 
-            off_molecule._conformers = [new_conformer]
-            oe_molecule = off_molecule.to_openeye()
+                new_conformer, energy = run_openmm(off_molecule, omm_system)
 
-            oechem.OESetSDData(oe_molecule, "Energy FFXML", str(energy))
+                off_molecule._conformers = [new_conformer]
+                oe_molecule = off_molecule.to_openeye()
 
-            for key, value in oe_data.items():
-                oechem.OESetSDData(oe_molecule, key, value)
+                oechem.OESetSDData(oe_molecule, "Energy FFXML", str(energy))
 
-            oechem.OEWriteMolecule(output_stream, oe_molecule)
+                for key, value in oe_data.items():
+                    oechem.OESetSDData(oe_molecule, key, value)
 
-    except BaseException:
-        logging.exception(
-            f"failed to minimize {input_sdf} with {force_field}"
-        )
-        failed = True
+                oechem.OEWriteMolecule(output_stream, oe_molecule)
 
-    input_stream.close()
-    output_stream.close()
+        except BaseException:
+            logging.exception(
+                f"failed to minimize {input_sdf} with {force_field}"
+            )
+            failed = True
 
     if failed and os.path.isfile(output):
         os.unlink(output)
