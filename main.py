@@ -35,7 +35,7 @@ def main():
     plot_cdfs()
 
 
-def plot_cdfs(force_fields):
+def plot_cdfs():
     x_ranges = {
         "dde": (-5.0, 5.0),
         "rmsd": (0.0, 4.0),
@@ -43,17 +43,16 @@ def plot_cdfs(force_fields):
     }
     for data in ["dde", "rmsd", "tfd"]:
         figure, axis = pyplot.subplots()
-        for force_field in force_fields:
-            dataframe = pandas.read_csv(f"{force_field}-{data}.csv")
+        dataframe = pandas.read_csv(f"{data}.csv")
 
-            sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
+        sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
 
-            axis.plot(
-                sorted_data,
-                numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
-                ".--",
-                label=force_field,
-            )
+        axis.plot(
+            sorted_data,
+            numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
+            ".--",
+            label="Force Field",
+        )
 
         axis.set_xlabel(data)
         axis.set_ylabel("CDF")
