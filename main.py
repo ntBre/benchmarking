@@ -1,3 +1,5 @@
+import os
+
 import numpy
 import pandas
 from ibstore import MoleculeStore
@@ -7,12 +9,17 @@ from openff.qcsubmit.results import OptimizationResultCollection
 
 def main():
     ff = "force-field.offxml"
-    opt = OptimizationResultCollection.parse_file(
-        "../valence-fitting/02_curate-data/datasets/filtered-opt.json"
-    )
-    store = MoleculeStore.from_qcsubmit_collection(
-        opt, database_name="tmp.sqlite"
-    )
+    db_file = "tmp.sqlite"
+
+    if os.path.exists(db_file):
+        print(f"loading existing database from {db_file}")
+        store = MoleculeStore(db_file)
+    else:
+        print(f"generating database, saving to {db_file}")
+        opt = OptimizationResultCollection.parse_file(
+            "../valence-fitting/02_curate-data/datasets/filtered-opt.json"
+        )
+        store = MoleculeStore.from_qcsubmit_collection(opt, "tmp.sqlite")
 
     store.optimize_mm(force_field=ff)
     store.get_dde(ff).to_csv("dde.csv")
