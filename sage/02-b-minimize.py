@@ -45,31 +45,13 @@ def run_openmm(molecule: Molecule, system: openmm.System):
 
 
 @click.command()
-@click.option(
-    "-i", "--input", "input_path", type=click.Path(exists=True, dir_okay=False)
-)
-@click.option(
-    "-fftype",
-    "--force-field-type",
-    "force_field_type",
-    type=click.STRING,
-    default="SMIRNOFF",
-)
-@click.option(
-    "-ff",
-    "--force-field",
-    "force_field_path",
-    type=click.Path(exists=False, dir_okay=False),
-)
-@click.option(
-    "-o",
-    "--output",
-    "output_path",
-    type=click.Path(exists=False, dir_okay=False),
-)
-def main(input_path, force_field_path, force_field_type, output_path):
-    input_stream = oechem.oemolistream(input_path)
-    output_stream = oechem.oemolostream(output_path)
+@click.option("--input-sdf", type=click.Path(exists=True, dir_okay=False))
+@click.option("--force-field", type=click.Path(exists=False, dir_okay=False))
+@click.option("--output", type=click.Path(exists=False, dir_okay=False))
+@click.option("--force-field-type", default="SMIRNOFF")
+def main(input_sdf, force_field, force_field_type, output):
+    input_stream = oechem.oemolistream(input_sdf)
+    output_stream = oechem.oemolostream(output)
 
     failed = False
 
@@ -99,7 +81,7 @@ def main(input_path, force_field_path, force_field_type, output_path):
 
             if force_field_type.lower() == "smirnoff":
                 smirnoff_force_field = smirnoff.ForceField(
-                    force_field_path, allow_cosmetic_attributes=True
+                    force_field, allow_cosmetic_attributes=True
                 )
 
                 if (
@@ -118,7 +100,7 @@ def main(input_path, force_field_path, force_field_type, output_path):
                 force_field = ForceField()
 
                 generator = GAFFTemplateGenerator(
-                    molecules=off_molecule, forcefield=force_field_path
+                    molecules=off_molecule, forcefield=force_field
                 )
 
                 force_field.registerTemplateGenerator(generator.generator)
@@ -146,15 +128,15 @@ def main(input_path, force_field_path, force_field_type, output_path):
 
     except BaseException:
         logging.exception(
-            f"failed to minimize {input_path} with {force_field_path}"
+            f"failed to minimize {input_sdf} with {force_field}"
         )
         failed = True
 
     input_stream.close()
     output_stream.close()
 
-    if failed and os.path.isfile(output_path):
-        os.unlink(output_path)
+    if failed and os.path.isfile(output):
+        os.unlink(output)
 
 
 if __name__ == "__main__":
