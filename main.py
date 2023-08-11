@@ -6,33 +6,11 @@ import numpy
 import pandas
 from ibstore import MoleculeStore
 from matplotlib import pyplot
-from openff.qcsubmit.results import (
-    OptimizationResult,
-    OptimizationResultCollection,
-)
-from openff.qcsubmit.results.filters import ResultRecordFilter
-from openff.toolkit import Molecule
-from openff.toolkit.utils import OpenEyeToolkitWrapper
-from openff.toolkit.utils.toolkit_registry import _toolkit_registry_manager
-from openff.toolkit.utils.exceptions import UndefinedStereochemistryError
+from openff.qcsubmit.results import OptimizationResultCollection
 
 # try to suppress stereo warnings - from lily's valence-fitting
 # curate-dataset.py
 logging.getLogger("openff").setLevel(logging.ERROR)
-
-
-class StereoFilter(ResultRecordFilter):
-    def _filter_function(
-        self, result: OptimizationResult, _record, _molecule
-    ) -> bool:
-        with _toolkit_registry_manager(OpenEyeToolkitWrapper()):
-            try:
-                Molecule.from_mapped_smiles(result.cmiles)
-            except UndefinedStereochemistryError:
-                return False
-            except Exception as e:
-                raise e
-        return True
 
 
 def main():
@@ -46,9 +24,6 @@ def main():
     else:
         print(f"loading initial dataset from {dataset}")
         opt = OptimizationResultCollection.parse_file(dataset)
-
-        print("filtering by stereochemistry")
-        opt = opt.filter(StereoFilter())
 
         print(f"generating database, saving to {db_file}")
         store = MoleculeStore.from_qcsubmit_collection(opt, db_file)
