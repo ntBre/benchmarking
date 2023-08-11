@@ -6,21 +6,26 @@ import pandas
 from ibstore import MoleculeStore
 from matplotlib import pyplot
 from openff.qcsubmit.results import OptimizationResultCollection
+from openff.qcsubmit.results.filters import UnperceivableStereoFilter
 
 
 def main():
     ff = "force-field.offxml"
     db_file = "tmp.sqlite"
+    dataset = "../valence-fitting/02_curate-data/datasets/filtered-opt.json"
 
     if os.path.exists(db_file):
         print(f"loading existing database from {db_file}")
         store = MoleculeStore(db_file)
     else:
+        print(f"loading initial dataset from {dataset}")
+        opt = OptimizationResultCollection.parse_file(dataset)
+
+        print("filtering by stereochemistry")
+        opt = opt.filter(UnperceivableStereoFilter())
+
         print(f"generating database, saving to {db_file}")
-        opt = OptimizationResultCollection.parse_file(
-            "../valence-fitting/02_curate-data/datasets/filtered-opt.json"
-        )
-        store = MoleculeStore.from_qcsubmit_collection(opt, "tmp.sqlite")
+        store = MoleculeStore.from_qcsubmit_collection(opt, db_file)
 
     print("started optimizing store")
     start = time.time()
