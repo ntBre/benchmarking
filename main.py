@@ -36,9 +36,9 @@ def main(dataset):
     end = time.time()
     print(f"finished optimizing after {end - start} sec")
 
-    store.get_dde(ff).to_csv("dde.csv")
-    store.get_rmsd(ff).to_csv("rmsd.csv")
-    store.get_tfd(ff).to_csv("tfd.csv")
+    store.get_dde(ff).to_csv("output/dde.csv")
+    store.get_rmsd(ff).to_csv("output/rmsd.csv")
+    store.get_tfd(ff).to_csv("output/tfd.csv")
 
     plot_cdfs()
 
@@ -51,7 +51,7 @@ def plot_cdfs():
     }
     for data in ["dde", "rmsd", "tfd"]:
         figure, axis = pyplot.subplots()
-        dataframe = pandas.read_csv(f"{data}.csv")
+        dataframe = pandas.read_csv(f"output/{data}.csv")
 
         sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
 
@@ -70,7 +70,7 @@ def plot_cdfs():
 
         axis.legend(loc=0)
 
-        figure.savefig(f"{data}.png")
+        figure.savefig(f"output/{data}.png")
 
 
 if __name__ == "__main__":
