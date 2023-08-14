@@ -17,6 +17,7 @@ hostname
 
 source ~/.bashrc
 mamba activate bench-dev
+export OE_LICENSE=
 
 make datasets/industry.json
 
