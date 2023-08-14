@@ -21,3 +21,9 @@ datasets/full-opt.json datasets/full-opt.sdf: sage/01-setup.py
 	@echo downloading full optimization benchmark
 	python $< "OpenFF Full Optimization Benchmark 1"	\
 		--output datasets/full-opt
+
+datasets/industry.json datasets/industry.sdf: sage/01-setup.py
+	$(ensure_datasets)
+	@echo downloading industry benchmark
+	python $< "OpenFF Industry Benchmark Season 1 v1.0"	\
+		--output datasets/industry
