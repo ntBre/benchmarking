@@ -15,6 +15,7 @@
 date
 hostname
 
+source ~/.bashrc
 mamba activate bench-dev
 module load imagemagick
 
