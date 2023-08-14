@@ -2,6 +2,7 @@ import logging
 import os
 import time
 
+import click
 import numpy
 import pandas
 from ibstore import MoleculeStore
@@ -13,10 +14,11 @@ from openff.qcsubmit.results import OptimizationResultCollection
 logging.getLogger("openff").setLevel(logging.ERROR)
 
 
-def main():
+@click.command()
+@click.option("--dataset")
+def main(dataset):
     ff = "force-field.offxml"
     db_file = "tmp.sqlite"
-    dataset = "../valence-fitting/02_curate-data/datasets/filtered-opt.json"
 
     if os.path.exists(db_file):
         print(f"loading existing database from {db_file}")
