@@ -3,8 +3,8 @@
 #SBATCH -p standard
 #SBATCH -t 144:00:00
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem=10000mb
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32gb
 #SBATCH --account dmobley_lab
 #SBATCH --export ALL
 #SBATCH --mail-user=bwestbr1@uci.edu
