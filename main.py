@@ -16,9 +16,10 @@ logging.getLogger("openff").setLevel(logging.ERROR)
 
 @click.command()
 @click.option("--dataset")
-def main(dataset):
+@click.option("--db-file", default="tmp.sqlite")
+@click.option("--out-dir")
+def main(dataset, db_file, out_dir):
     ff = "force-field.offxml"
-    db_file = "tmp.sqlite"
 
     if os.path.exists(db_file):
         print(f"loading existing database from {db_file}")
@@ -36,14 +37,14 @@ def main(dataset):
     end = time.time()
     print(f"finished optimizing after {end - start} sec")
 
-    store.get_dde(ff).to_csv("output/dde.csv")
-    store.get_rmsd(ff).to_csv("output/rmsd.csv")
-    store.get_tfd(ff).to_csv("output/tfd.csv")
+    store.get_dde(ff).to_csv(f"{out_dir}/dde.csv")
+    store.get_rmsd(ff).to_csv(f"{out_dir}/rmsd.csv")
+    store.get_tfd(ff).to_csv(f"{out_dir}/tfd.csv")
 
-    plot_cdfs()
+    plot_cdfs(out_dir)
 
 
-def plot_cdfs():
+def plot_cdfs(out_dir):
     x_ranges = {
         "dde": (-5.0, 5.0),
         "rmsd": (0.0, 4.0),
@@ -51,7 +52,7 @@ def plot_cdfs():
     }
     for data in ["dde", "rmsd", "tfd"]:
         figure, axis = pyplot.subplots()
-        dataframe = pandas.read_csv(f"output/{data}.csv")
+        dataframe = pandas.read_csv(f"{out_dir}/{data}.csv")
 
         sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
 
@@ -70,7 +71,7 @@ def plot_cdfs():
 
         axis.legend(loc=0)
 
-        figure.savefig(f"output/{data}.png")
+        figure.savefig(f"{out_dir}/{data}.png")
 
 
 if __name__ == "__main__":
