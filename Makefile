@@ -12,17 +12,14 @@ ensure_datasets := mkdir -p datasets
 full-opt-output/out.png: $(addprefix full-opt-output/,$(pngs))
 	montage $^ -geometry 640x480\>+3+1 $@
 
-$(addprefix full-opt-output/,$(csvs) $(pngs)) status tmp.sqlite: datasets/full-opt.json main.py
+$(addprefix full-opt-output/,$(csvs) $(pngs)) tmp.sqlite: datasets/full-opt.json main.py
 	python main.py --dataset $< --db-file tmp.sqlite --out-dir full-opt-output
-	echo benchmarked $< > status
 
 industry-output/out.png: $(addprefix industry-output/,$(pngs))
 	montage $^ -geometry 640x480\>+3+1 $@
 
-$(addprefix industry-output/,$(csvs) $(pngs)) status industry.sqlite: datasets/industry.json main.py
+$(addprefix industry-output/,$(csvs) $(pngs)) industry.sqlite: datasets/industry.json main.py
 	python main.py --dataset $< --db-file industry.sqlite --out-dir industry-output
-	echo -n benchmarked $< on >> status
-	date >> status
 
 datasets/full-opt.json datasets/full-opt.sdf: sage/01-setup.py
 	$(ensure_datasets)
