@@ -4,6 +4,7 @@ channels:
   - openeye
 dependencies:
   - python
+  - click
   - openff-toolkit
   - openff-qcsubmit
   - openmmforcefields
