@@ -16,7 +16,7 @@ date
 hostname
 
 source ~/.bashrc
-mamba activate bench-dev
+mamba activate ib-dev-new
 module load imagemagick
 
 make industry-output/out.png
