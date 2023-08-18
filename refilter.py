@@ -1,3 +1,4 @@
+import logging
 from multiprocessing import Pool
 
 import click
@@ -10,6 +11,8 @@ from openff.toolkit.utils.exceptions import (
 )
 from openff.toolkit.utils.toolkits import OpenEyeToolkitWrapper
 from tqdm import tqdm
+
+logging.getLogger("openff").setLevel(logging.ERROR)
 
 
 # taken from valence-fitting
