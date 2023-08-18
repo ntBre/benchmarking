@@ -1,0 +1,10 @@
+name: ib-dev-new
+channels:
+  - conda-forge
+  - openeye
+dependencies:
+  - python
+  - openff-toolkit
+  - openff-qcsubmit
+  - openmmforcefields
+  - openeye-toolkits
