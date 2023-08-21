@@ -18,7 +18,7 @@ $(addprefix full-opt-output/,$(csvs) $(pngs)) tmp.sqlite: datasets/full-opt.json
 industry-output/out.png: $(addprefix industry-output/,$(pngs))
 	montage $^ -geometry 640x480\>+3+1 $@
 
-$(addprefix industry-output/,$(csvs) $(pngs)) industry.sqlite: datasets/industry.json main.py
+$(addprefix industry-output/,$(csvs) $(pngs)) industry.sqlite: datasets/filtered-industry.json main.py
 	python main.py --dataset $< --db-file industry.sqlite --out-dir industry-output
 
 datasets/full-opt.json datasets/full-opt.sdf: sage/01-setup.py
