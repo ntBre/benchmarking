@@ -15,12 +15,11 @@ logging.getLogger("openff").setLevel(logging.ERROR)
 
 
 @click.command()
-@click.option("--dataset")
+@click.option("--forcefield", default="force-field.offxml")
+@click.option("--dataset", default="datasets/filtered-industry.json")
 @click.option("--db-file", default="tmp.sqlite")
-@click.option("--out-dir")
-def main(dataset, db_file, out_dir):
-    ff = "force-field.offxml"
-
+@click.option("--out-dir", default=".")
+def main(forcefield, dataset, db_file, out_dir):
     if os.path.exists(db_file):
         print(f"loading existing database from {db_file}")
         store = MoleculeStore(db_file)
@@ -33,13 +32,13 @@ def main(dataset, db_file, out_dir):
 
     print("started optimizing store")
     start = time.time()
-    store.optimize_mm(force_field=ff)
+    store.optimize_mm(force_field=forcefield)
     end = time.time()
     print(f"finished optimizing after {end - start} sec")
 
-    store.get_dde(ff).to_csv(f"{out_dir}/dde.csv")
-    store.get_rmsd(ff).to_csv(f"{out_dir}/rmsd.csv")
-    store.get_tfd(ff).to_csv(f"{out_dir}/tfd.csv")
+    store.get_dde(forcefield).to_csv(f"{out_dir}/dde.csv")
+    store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")
+    store.get_tfd(forcefield).to_csv(f"{out_dir}/tfd.csv")
 
     plot_cdfs(out_dir)
 
