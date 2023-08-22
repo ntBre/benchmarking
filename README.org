@@ -24,6 +24,7 @@
   | full-opt-output | *                  | Benchmark output on full-opt dataset                      |
 
 * Results
+** OpenFF Full Optimization Benchmark 1
   #+NAME: output-results
   #+ATTR_HTML: :width 600px
-  [[file:out.png]]
+  [[file:full-opt-output/out.png]]
