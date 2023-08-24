@@ -43,7 +43,10 @@ def main(forcefield, dataset, db_file, out_dir):
     plot_cdfs(out_dir)
 
 
-def plot_cdfs(out_dir):
+def plot_cdfs(out_dir, in_dirs=None):
+    # assume the input is next to the desired output
+    if in_dirs is None:
+        in_dirs = out_dir
     x_ranges = {
         "dde": (-5.0, 5.0),
         "rmsd": (0.0, 4.0),
@@ -51,32 +54,37 @@ def plot_cdfs(out_dir):
     }
     for data in ["dde", "rmsd", "tfd"]:
         figure, axis = pyplot.subplots()
-        dataframe = pandas.read_csv(f"{out_dir}/{data}.csv")
 
-        if data == "dde":
-            counts, bins = numpy.histogram(
-                dataframe[dataframe.columns[-1]],
-                bins=numpy.linspace(-15, 15, 16),
-            )
+        for in_dir in in_dirs:
+            dataframe = pandas.read_csv(f"{in_dir}/{data}.csv")
 
-            axis.stairs(counts, bins)
+            if data == "dde":
+                counts, bins = numpy.histogram(
+                    dataframe[dataframe.columns[-1]],
+                    bins=numpy.linspace(-15, 15, 16),
+                )
 
-            axis.set_ylabel("Count")
-        else:
-            sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
+                axis.stairs(counts, bins, label=in_dir)
 
-            axis.plot(
-                sorted_data,
-                numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
-                ".--",
-                label="Force Field",
-            )
+                axis.set_ylabel("Count")
+            else:
+                sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
 
-            axis.set_xlabel(data)
+                axis.plot(
+                    sorted_data,
+                    numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
+                    ".--",
+                    label=in_dir,
+                )
+
+                axis.set_xlim(x_ranges[data])
+                axis.set_ylim((0.0, 1.0))
+
+            label = dict(
+                dde="DDE (kcal mol$^{-1}$)", rmsd="RMSD (Å)", tfd="TFD"
+            )[data]
+            axis.set_xlabel(label)
             axis.set_ylabel("CDF")
-
-            axis.set_xlim(x_ranges[data])
-            axis.set_ylim((0.0, 1.0))
 
         axis.legend(loc=0)
 
