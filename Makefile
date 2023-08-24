@@ -32,3 +32,9 @@ datasets/industry.json datasets/industry.sdf: sage/01-setup.py
 	@echo downloading industry benchmark
 	python $< "OpenFF Industry Benchmark Season 1 v1.0"	\
 		--output datasets/industry
+
+# this is a phony recipe for testing ibstore code
+.PHONY: temp
+temp:
+	python main.py --dataset datasets/small-opt.json \
+		--db-file $$(mktemp -d)/tmp.sqlite --out-dir /tmp
