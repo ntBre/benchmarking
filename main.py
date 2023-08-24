@@ -32,7 +32,7 @@ def main(forcefield, dataset, db_file, out_dir):
 
     print("started optimizing store")
     start = time.time()
-    store.optimize_mm(force_field=forcefield)
+    store.optimize_mm(force_field=forcefield, n_processes=16)
     end = time.time()
     print(f"finished optimizing after {end - start} sec")
 
