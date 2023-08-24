@@ -3,3 +3,4 @@
 /sage/*.sdf
 *.out
 *.err
+__pycache__/
