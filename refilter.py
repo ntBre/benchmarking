@@ -49,7 +49,9 @@ def filter_entry(arg):
 @click.command()
 @click.option("--nprocs", default=12)
 def main(nprocs):
-    ds = OptimizationResultCollection.parse_file("datasets/industry.json")
+    ds = OptimizationResultCollection.parse_file(
+        "datasets/unfiltered-industry.json"
+    )
     keys = ds.entries.keys()
     assert len(keys) == 1
     key = list(keys)[0]
@@ -64,7 +66,7 @@ def main(nprocs):
                 filtered_entries.append(result)
 
     ds.entries = filtered_entries
-    with open("datasets/filtered-industry.json", "w") as out:
+    with open("datasets/industry.json", "w") as out:
         out.write(ds.json(indent=2))
 
 

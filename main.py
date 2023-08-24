@@ -16,7 +16,7 @@ logging.getLogger("openff").setLevel(logging.ERROR)
 
 @click.command()
 @click.option("--forcefield", default="force-field.offxml")
-@click.option("--dataset", default="datasets/filtered-industry.json")
+@click.option("--dataset", default="datasets/industry.json")
 @click.option("--db-file", default="tmp.sqlite")
 @click.option("--out-dir", default=".")
 def main(forcefield, dataset, db_file, out_dir):

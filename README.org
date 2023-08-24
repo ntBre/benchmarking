@@ -29,7 +29,7 @@
    #+begin_src shell
      python main.py \
 	    --forcefield force-field.offxml \
-	    --dataset datasets/filtered-industry.json \
+	    --dataset datasets/industry.json \
 	    --db-file tmp.sqlite \
 	    --out-dir .
    #+end_src
