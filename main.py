@@ -46,7 +46,7 @@ def main(forcefield, dataset, db_file, out_dir):
 def plot_cdfs(out_dir, in_dirs=None):
     # assume the input is next to the desired output
     if in_dirs is None:
-        in_dirs = out_dir
+        in_dirs = [out_dir]
     x_ranges = {
         "dde": (-5.0, 5.0),
         "rmsd": (0.0, 4.0),
