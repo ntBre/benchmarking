@@ -3,35 +3,24 @@
 csvs := dde.csv rmsd.csv tfd.csv
 pngs := $(subst .csv,.png,$(csvs))
 
-vf_training := ../valence-fitting/02_curate-data/datasets/filtered-opt.json
+# for specifying a subdirectory of output
+TARGET =
 
-ensure_datasets := mkdir -p datasets
+forcefield = force-field.offxml
+ifdef TARGET
+    forcefield = $(TARGET).offxml
+endif
 
-.DELETE_ON_ERROR = tmp.sqlite industry.sqlite
+$(addprefix output/%/$(TARGET)/,$(csvs) $(pngs)) %.sqlite: datasets/%.json main.py
+# DO NOT run M-x align here, it adds spaces around the bash =
+	base=$(basename $(notdir $<));					\
+	mkdir -p $$base;						\
+	python main.py --dataset $< --db-file $$base.$(TARGET).sqlite	\
+		--out-dir output/$$base					\
+		--forcefield $(forcefield)
 
-full-opt-output/out.png: $(addprefix full-opt-output/,$(pngs))
+output/%/$(TARGET)/out.png: $(addprefix output/%/$(TARGET)/,$(pngs))
 	montage $^ -geometry 640x480\>+3+1 $@
-
-$(addprefix full-opt-output/,$(csvs) $(pngs)) tmp.sqlite: datasets/full-opt.json main.py
-	python main.py --dataset $< --db-file tmp.sqlite --out-dir full-opt-output
-
-industry-output/out.png: $(addprefix industry-output/,$(pngs))
-	montage $^ -geometry 640x480\>+3+1 $@
-
-$(addprefix industry-output/,$(csvs) $(pngs)) industry.sqlite: datasets/filtered-industry.json main.py
-	python main.py --dataset $< --db-file industry.sqlite --out-dir industry-output
-
-datasets/full-opt.json datasets/full-opt.sdf: sage/01-setup.py
-	$(ensure_datasets)
-	@echo downloading full optimization benchmark
-	python $< "OpenFF Full Optimization Benchmark 1"	\
-		--output datasets/full-opt
-
-datasets/industry.json datasets/industry.sdf: sage/01-setup.py
-	$(ensure_datasets)
-	@echo downloading industry benchmark
-	python $< "OpenFF Industry Benchmark Season 1 v1.0"	\
-		--output datasets/industry
 
 # this is a phony recipe for testing ibstore code
 .PHONY: temp
