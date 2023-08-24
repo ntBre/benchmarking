@@ -53,24 +53,34 @@ def plot_cdfs(out_dir):
         figure, axis = pyplot.subplots()
         dataframe = pandas.read_csv(f"{out_dir}/{data}.csv")
 
-        sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
+        if data == "dde":
+            counts, bins = numpy.histogram(
+                dataframe[dataframe.columns[-1]],
+                bins=numpy.linspace(-15, 15, 16),
+            )
 
-        axis.plot(
-            sorted_data,
-            numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
-            ".--",
-            label="Force Field",
-        )
+            axis.stairs(counts, bins)
 
-        axis.set_xlabel(data)
-        axis.set_ylabel("CDF")
+            axis.set_ylabel("Count")
+        else:
+            sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
 
-        axis.set_xlim(x_ranges[data])
-        axis.set_ylim((0.0, 1.0))
+            axis.plot(
+                sorted_data,
+                numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
+                ".--",
+                label="Force Field",
+            )
+
+            axis.set_xlabel(data)
+            axis.set_ylabel("CDF")
+
+            axis.set_xlim(x_ranges[data])
+            axis.set_ylim((0.0, 1.0))
 
         axis.legend(loc=0)
 
-        figure.savefig(f"{out_dir}/{data}.png")
+        figure.savefig(f"{out_dir}/{data}.png", dpi=300)
 
 
 if __name__ == "__main__":
