@@ -41,16 +41,29 @@
    ~tmp.sqlite~, and the output CSV and PNG files are written to the current
    directory.
 ** Makefile
-   The Makefile is pretty messy and doesn't do much right now, but you can run
-   ~main.py~ on the industry dataset and then stick the resulting images together
-   with ImageMagick using:
+   The Makefile can automate this process, as well as sticking the resulting
+   images together with ImageMagick using something like:
 
    #+begin_src shell
-     make industry-output/out.png
+     make output/industry/out.png
    #+end_src
 
-   This assumes you've created the ~industry-output~ directory. These recipes
-   really need to be modularized.
+   More creatively, you can run the industry benchmarks on a custom forcefield
+   with something like:
+
+   #+begin_src shell
+     make output/industry/sage/out.png TARGET=sage
+   #+end_src
+
+   This looks for a forcefield named ~sage.offxml~ in the root directory and runs
+   ~main.py~ and the ImageMagick commands to generate the final output. It looks a
+   bit repetitive, but, for now at least, the ~output/industry/*~ directory and
+   the ~TARGET~ variable must be the same. This also works for any other dataset
+   in the ~datasets~ directory, for example:
+
+   #+begin_src shell
+     make output/full-opt/sage/out.png TARGET=sage
+   #+end_src
 ** Slurm
    Similarly, ~scripts/industry.sh~ simply calls the ~make~ command above, after
    activating the conda environment from ~env.yaml~. So if everything is set up,
@@ -67,7 +80,10 @@
 ** OpenFF Full Optimization Benchmark 1
    #+NAME: output-results
    #+ATTR_HTML: :width 600px
-   [[file:full-opt-output/out.png]]
+   [[file:output/full-opt/out.png]]
+** OpenFF Industry Benchmark Season 1 v1.0
+   #+ATTR_HTML: :width 600px
+   [[file:output/industry/out.png]]
 
 * Files
   | Dir             | File               | Purpose                                                   |
