@@ -40,13 +40,24 @@ def main(forcefield, dataset, db_file, out_dir):
     store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")
     store.get_tfd(forcefield).to_csv(f"{out_dir}/tfd.csv")
 
-    plot_cdfs(out_dir)
+    plot(out_dir)
 
 
-def plot_cdfs(out_dir, in_dirs=None):
+def plot(out_dir, in_dirs=None, names=None):
+    """
+    Plot each of the `dde`, `rmsd`, and `tfd` CSV files found in
+    `in_dirs` and write the resulting PNG images to out_dir. If
+    provided, take the plot legend entries from `names` instead of
+    `in_dirs`.
+    """
     # assume the input is next to the desired output
     if in_dirs is None:
         in_dirs = [out_dir]
+
+    # default to directory names
+    if names is None:
+        names = in_dirs
+
     x_ranges = {
         "dde": (-5.0, 5.0),
         "rmsd": (0.0, 4.0),
@@ -55,7 +66,7 @@ def plot_cdfs(out_dir, in_dirs=None):
     for data in ["dde", "rmsd", "tfd"]:
         figure, axis = pyplot.subplots()
 
-        for in_dir in in_dirs:
+        for name, in_dir in zip(names, in_dirs):
             dataframe = pandas.read_csv(f"{in_dir}/{data}.csv")
 
             if data == "dde":
@@ -64,7 +75,7 @@ def plot_cdfs(out_dir, in_dirs=None):
                     bins=numpy.linspace(-15, 15, 16),
                 )
 
-                axis.stairs(counts, bins, label=in_dir)
+                axis.stairs(counts, bins, label=name)
 
                 axis.set_ylabel("Count")
             else:
@@ -74,7 +85,7 @@ def plot_cdfs(out_dir, in_dirs=None):
                     sorted_data,
                     numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
                     ".--",
-                    label=in_dir,
+                    label=name,
                 )
 
                 axis.set_xlim(x_ranges[data])
