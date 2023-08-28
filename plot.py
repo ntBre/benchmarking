@@ -9,6 +9,6 @@ from main import plot
 
 plot(
     "/tmp",
-    ["output/industry/", "output/industry/sage"],
-    names=["TM", "Sage TM"],
+    ["output/industry/", "output/industry/sage", "output/industry/sage_sage"],
+    names=["TM", "Sage TM", "Sage"],
 )
