@@ -1,6 +1,7 @@
-/tmp.sqlite
+/*.sqlite
 /sage/*.json
-/sage/*.sdf
+*.sdf
 *.out
 *.err
 __pycache__/
+status
