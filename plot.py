@@ -21,6 +21,7 @@ subprocess.run(
         "montage",
         "/tmp/rmsd.png",
         "/tmp/tfd.png",
+        "/tmp/step_dde.png",
         "/tmp/dde.png",
         "-geometry",
         "640x480>",
