@@ -1,3 +1,5 @@
+import subprocess
+
 from main import plot
 
 # "TM" is the Sage 2.1.0 force field with the torsion multiplicity changes,
@@ -11,4 +13,19 @@ plot(
     "/tmp",
     ["output/industry/", "output/industry/sage", "output/industry/sage_sage"],
     names=["TM", "Sage TM", "Sage"],
+)
+
+
+subprocess.run(
+    [
+        "montage",
+        "/tmp/rmsd.png",
+        "/tmp/tfd.png",
+        "/tmp/dde.png",
+        "-geometry",
+        "640x480>",
+        "-tile",
+        "2x2",
+        "/tmp/out.png",
+    ]
 )
