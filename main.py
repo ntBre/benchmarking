@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+import warnings
 
 import click
 import numpy
@@ -13,6 +14,11 @@ from openff.qcsubmit.results import OptimizationResultCollection
 # try to suppress stereo warnings - from lily's valence-fitting
 # curate-dataset.py
 logging.getLogger("openff").setLevel(logging.ERROR)
+
+# suppress divide by zero in numpy.log
+warnings.filterwarnings(
+    "ignore", message="divide by zero", category=RuntimeWarning
+)
 
 
 @click.command()
