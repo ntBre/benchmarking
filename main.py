@@ -5,6 +5,7 @@ import time
 import click
 import numpy
 import pandas
+import seaborn as sea
 from ibstore import MoleculeStore
 from matplotlib import pyplot
 from openff.qcsubmit.results import OptimizationResultCollection
@@ -59,17 +60,30 @@ def plot(out_dir, in_dirs=None, names=None):
         names = in_dirs
 
     x_ranges = {
-        "dde": (-5.0, 5.0),
-        "rmsd": (0.0, 4.0),
-        "tfd": (0.0, 2.0),
+        "dde": (-6.0, 6.0),
+        "rmsd": (-2.0, 0.7),
+        "tfd": (-4.0, 0.5),
     }
-    for data in ["dde", "rmsd", "tfd"]:
-        figure, axis = pyplot.subplots()
+    for dtype in ["step_dde", "dde", "rmsd", "tfd"]:
+        figure, axis = pyplot.subplots(figsize=(6, 4))
 
         for name, in_dir in zip(names, in_dirs):
-            dataframe = pandas.read_csv(f"{in_dir}/{data}.csv")
+            if dtype == "step_dde":
+                read = "dde"
+            else:
+                read = dtype
+            dataframe = pandas.read_csv(f"{in_dir}/{read}.csv")
 
-            if data == "dde":
+            if dtype == "dde":
+                sea.kdeplot(
+                    data=dataframe[dataframe.columns[-1]],
+                    ax=axis,
+                    label=name,
+                )
+                label = "DDE (kcal mol$^{-1}$)"
+                axis.set_ylabel("Density")
+                axis.set_xlim(x_ranges[dtype])
+            elif dtype == "step_dde":
                 counts, bins = numpy.histogram(
                     dataframe[dataframe.columns[-1]],
                     bins=numpy.linspace(-15, 15, 16),
@@ -78,28 +92,27 @@ def plot(out_dir, in_dirs=None, names=None):
                 axis.stairs(counts, bins, label=name)
 
                 axis.set_ylabel("Count")
+                label = "DDE (kcal mol$^{-1}$)"
             else:
-                sorted_data = numpy.sort(dataframe[dataframe.columns[-1]])
-
-                axis.plot(
-                    sorted_data,
-                    numpy.arange(1, len(sorted_data) + 1) / len(sorted_data),
-                    ".--",
+                # for rmsd and tfd, we want the log KDE
+                sorted_data = numpy.sort(
+                    numpy.log10(dataframe[dataframe.columns[-1]])
+                )
+                sea.kdeplot(
+                    data=sorted_data,
+                    ax=axis,
                     label=name,
                 )
+                label = "Log " + dtype.upper()
+                axis.set_ylabel("Density")
+                axis.set_xlim(x_ranges[dtype])
 
-                axis.set_xlim(x_ranges[data])
-                axis.set_ylim((0.0, 1.0))
-
-            label = dict(
-                dde="DDE (kcal mol$^{-1}$)", rmsd="RMSD (Å)", tfd="TFD"
-            )[data]
             axis.set_xlabel(label)
-            axis.set_ylabel("CDF")
 
         axis.legend(loc=0)
 
-        figure.savefig(f"{out_dir}/{data}.png", dpi=300)
+        pyplot.tight_layout()
+        figure.savefig(f"{out_dir}/{dtype}.png", dpi=300)
 
 
 if __name__ == "__main__":
