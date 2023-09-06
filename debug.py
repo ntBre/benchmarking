@@ -83,4 +83,4 @@ molecules = [
 ]
 
 for i, mol in enumerate(molecules):
-    draw_rdkit(mol, f"mol{i}.png")
+    draw_rdkit(mol, f"debug/mol{i}.png")
