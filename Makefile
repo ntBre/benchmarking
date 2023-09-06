@@ -27,3 +27,9 @@ output/%/$(TARGET)/out.png: $(addprefix output/%/$(TARGET)/,$(pngs))
 temp:
 	python main.py --dataset datasets/small-opt.json \
 		--db-file $$(mktemp -d)/tmp.sqlite --out-dir /tmp
+
+.PHONY: debug
+debug:
+	rm -r debug
+	mkdir debug
+	python debug.py
