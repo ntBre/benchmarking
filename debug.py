@@ -3,6 +3,7 @@
 
 import importlib
 import sys
+from collections import defaultdict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -69,7 +70,7 @@ data = tm.merge(sage_tm).merge(sage_sage)
 data = data.rename(columns={"Unnamed: 0": "Record ID"})
 
 # list of records with substantial disagreements - 63 of these for eps = 10.0
-eps = 80.0
+eps = 10.0
 diffs = data[abs(data["Sage TM"] - data["Sage"]) > eps]
 
 # some of these are actually better in Sage TM, so filter further by the ones
@@ -78,7 +79,8 @@ our_bad = diffs[abs(diffs["Sage TM"]) > abs(diffs["Sage"])]
 print(our_bad)
 
 records = list(our_bad["Record ID"])
-print(records)
+
+print(f"{len(records)} bad records")
 
 ds = OptimizationResultCollection.parse_file("datasets/industry.json")
 data = [v for value in ds.entries.values() for v in value]
@@ -100,10 +102,19 @@ molecules = [
     for r in tqdm(data, desc="Converting to molecules")
 ]
 
+do_plot = False
+
+counts = defaultdict(int)
 for i, mol in enumerate(molecules):
     for s, smirks in enumerate(new_smirks):
         if mol.chemical_environment_matches(smirks):
-            print(f"drawing mol {i}-{s}")
-            known_issues.draw_rdkit(
-                mol, f"debug/mol{i}-{s}.png", smirks, max_matches=1
-            )
+            counts[i] = 1
+            if do_plot:
+                print(f"drawing mol {i}-{s}")
+                known_issues.draw_rdkit(
+                    mol, f"debug/mol{i}-{s}.png", smirks, max_matches=1
+                )
+            else:
+                break
+
+print(f"{sum(counts.values())} matching records")
