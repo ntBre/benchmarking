@@ -28,8 +28,9 @@ temp:
 	python main.py --dataset datasets/small-opt.json \
 		--db-file $$(mktemp -d)/tmp.sqlite --out-dir /tmp
 
+ARGS =
 .PHONY: debug
 debug:
 	rm -r debug
 	mkdir debug
-	python debug.py
+	python debug.py $(ARGS)
