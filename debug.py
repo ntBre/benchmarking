@@ -56,9 +56,10 @@ def plot(data, filename="debug.png", dpi=200):
 
 
 @click.command()
-@click.option("--eps", default=10.0)
-@click.option("--draw", default=False)
-def main(eps, draw):
+@click.option("--eps", default=10.0, help="difference to consider 'bad'")
+@click.option("--draw", default=False, help="draw the bad molecules")
+@click.option("--cmp", default="TM", help="column to compare to sage")
+def main(eps, draw, cmp):
     tm = pd.read_csv("output/industry/dde.csv").rename(
         columns={"difference": "TM"}
     )
@@ -76,11 +77,11 @@ def main(eps, draw):
 
     # list of records with substantial disagreements - 63 of these for eps =
     # 10.0
-    diffs = data[abs(data["Sage TM"] - data["Sage"]) > eps]
+    diffs = data[abs(data[cmp] - data["Sage"]) > eps]
 
-    # some of these are actually better in Sage TM, so filter further by the
-    # ones with larger magnitudes in the TM version - 36 for eps = 10.0
-    our_bad = diffs[abs(diffs["Sage TM"]) > abs(diffs["Sage"])]
+    # some of these are actually better in TM, so filter further by the ones
+    # with larger magnitudes in the TM version - 36 for eps = 10.0
+    our_bad = diffs[abs(diffs[cmp]) > abs(diffs["Sage"])]
     print(our_bad)
 
     records = list(our_bad["Record ID"])
