@@ -69,7 +69,7 @@ data = tm.merge(sage_tm).merge(sage_sage)
 data = data.rename(columns={"Unnamed: 0": "Record ID"})
 
 # list of records with substantial disagreements - 63 of these for eps = 10.0
-eps = 20.0
+eps = 80.0
 diffs = data[abs(data["Sage TM"] - data["Sage"]) > eps]
 
 # some of these are actually better in Sage TM, so filter further by the ones

@@ -5,4 +5,3 @@
 *.err
 __pycache__/
 status
-/debug/
