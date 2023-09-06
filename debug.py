@@ -60,6 +60,10 @@ def plot(data, filename="debug.png", dpi=200):
 @click.option("--draw", default=False, help="draw the bad molecules")
 @click.option("--cmp", default="TM", help="column to compare to sage")
 def main(eps, draw, cmp):
+    inner(eps, draw, cmp)
+
+
+def inner(eps, draw, cmp):
     tm = pd.read_csv("output/industry/dde.csv").rename(
         columns={"difference": "TM"}
     )
@@ -121,7 +125,9 @@ def main(eps, draw, cmp):
                 else:
                     break
 
-    print(f"{sum(counts.values())} matching records")
+    print(f"{sum(counts.values())} matching records:")
+    keys = counts.keys()
+    return [r.record_id for i, r in enumerate(data) if i in keys]
 
 
 if __name__ == "__main__":
