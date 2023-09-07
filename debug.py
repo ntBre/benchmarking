@@ -127,7 +127,9 @@ def inner(eps, draw, cmp):
 
     print(f"{sum(counts.values())} matching records:")
     keys = counts.keys()
-    return [r.record_id for i, r in enumerate(data) if i in keys]
+    matching_records = [r.record_id for i, r in enumerate(data) if i in keys]
+    print(our_bad[our_bad["Record ID"].astype(str).isin(matching_records)])
+    return matching_records
 
 
 if __name__ == "__main__":
