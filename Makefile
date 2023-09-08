@@ -3,12 +3,15 @@
 csvs := dde.csv rmsd.csv tfd.csv
 pngs := $(subst .csv,.png,$(csvs))
 
-# for specifying a subdirectory of output
+# for specifying a subdirectory of output. the name must match the filename of
+# an existing force field .offxml file in FF_DIR
 TARGET =
+
+FF_DIR = forcefields
 
 forcefield = force-field.offxml
 ifdef TARGET
-    forcefield = $(TARGET).offxml
+    forcefield = $(FF_DIR)/$(TARGET).offxml
 endif
 
 $(addprefix output/%/$(TARGET)/,$(csvs) $(pngs)) %.sqlite: datasets/%.json main.py

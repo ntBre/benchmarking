@@ -90,7 +90,8 @@
   |-----------------+--------------------+-----------------------------------------------------------|
   | .               | main.py            | Benchmarking script using ibstore                         |
   |                 | env.yaml           | conda environment to run the script                       |
-  |                 | tm.offxml          | FB-optimized, really-filtered torsion-multiplicity FF     |
+  |-----------------+--------------------+-----------------------------------------------------------|
+  | forcefields     | tm.offxml          | FB-optimized, really-filtered torsion-multiplicity FF     |
   |                 | sage.offxml        | FB-optimized sage 2.1.0 with torsion-multiplicity data    |
   |                 | sage-2.1.0.offxml  | Sage 2.1.0 dumped from the toolkit                        |
   |                 | eps-tors-10.offxml | Espaloma torsion values with Δ > 10.0 kcal/mol            |
