@@ -92,6 +92,7 @@
   |                 | env.yaml           | conda environment to run the script                       |
   |                 | force-field.offxml | FB-optimized, really-filtered torsion-multiplicity FF     |
   |                 | sage.offxml        | FB-optimized sage 2.1.0 with torsion-multiplicity data    |
+  |                 | sage-2.1.0.offxml  | Sage 2.1.0 dumped from the toolkit                        |
   |                 | refilter.py        | script to refilter the industry dataset for charge issues |
   |-----------------+--------------------+-----------------------------------------------------------|
   | sage            | env.yaml           | conda environment [[https://github.com/openforcefield/sage-2.1.0/blob/main/conda-envs/fb_193.yaml][from sage 2.1.0]]                         |
