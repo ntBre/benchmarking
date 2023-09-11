@@ -2,17 +2,15 @@ import subprocess
 
 from main import plot
 
-# "TM" is the Sage 2.1.0 force field with the torsion multiplicity changes,
-# trained on the tm dataset
-#
-# "Sage TM" is the original Sage 2.1.0 force field trained on the tm dataset
-#
-# "Sage" is the original Sage 2.1.0 force field trained on the original dataset
-
 plot(
     "/tmp",
-    ["output/industry/", "output/industry/sage", "output/industry/sage_sage"],
-    names=["TM", "Sage TM", "Sage"],
+    [
+        "output/industry/tm",
+        "output/industry/sage-tm",
+        "output/industry/sage-sage",
+        "output/industry/sage-2.1.0",
+    ],
+    names=["TM", "Sage TM", "My Sage", "Sage"],
 )
 
 
