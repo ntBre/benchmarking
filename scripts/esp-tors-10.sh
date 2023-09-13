@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J eps-tors-10
+#SBATCH -J esp-tors-10
 #SBATCH -p standard
 #SBATCH -t 144:00:00
 #SBATCH --nodes=1
@@ -19,7 +19,7 @@ source ~/.bashrc
 mamba activate ib-dev-new
 module load imagemagick
 
-target=eps-tors-10
+target=esp-tors-10
 make output/industry/$target/out.png TARGET=$target
 
 date
