@@ -5,12 +5,14 @@ from main import plot
 plot(
     "/tmp",
     [
-        "output/industry/tm",
-        "output/industry/sage-tm",
-        "output/industry/sage-sage",
+        "output/industry/esp-tors-10",
+        # "output/industry/tm",
+        # "output/industry/sage-tm",
+        # "output/industry/sage-sage",
         "output/industry/sage-2.1.0",
     ],
-    names=["TM", "Sage TM", "My Sage", "Sage"],
+    # names=["TM", "Sage TM", "My Sage", "Sage"],
+    names=["esp-tors-10", "Sage"],
 )
 
 
