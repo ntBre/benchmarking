@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J esp-full
 #SBATCH -p standard
-#SBATCH -t 144:00:00
+#SBATCH -t 72:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64gb
