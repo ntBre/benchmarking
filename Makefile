@@ -14,7 +14,7 @@ ifdef TARGET
     forcefield = $(FF_DIR)/$(TARGET).offxml
 endif
 
-$(addprefix output/%/$(TARGET)/,$(csvs) $(pngs)) %.sqlite: datasets/%.json main.py
+$(addprefix output/%/$(TARGET)/,$(csvs) $(pngs)) %.sqlite: datasets/%.json main.py $(forcefield)
 # DO NOT run M-x align here, it adds spaces around the bash =
 	base=$(basename $(notdir $<));					\
 	mkdir -p output/$$base/$(TARGET);				\
