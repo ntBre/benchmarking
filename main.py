@@ -50,7 +50,7 @@ def main(forcefield, dataset, db_file, out_dir):
     plot(out_dir)
 
 
-def plot(out_dir, in_dirs=None, names=None):
+def plot(out_dir, in_dirs=None, names=None, filter_records=None):
     """
     Plot each of the `dde`, `rmsd`, and `tfd` CSV files found in
     `in_dirs` and write the resulting PNG images to out_dir. If
@@ -79,6 +79,12 @@ def plot(out_dir, in_dirs=None, names=None):
             else:
                 read = dtype
             dataframe = pandas.read_csv(f"{in_dir}/{read}.csv")
+            dataframe = dataframe.rename(columns={"Unnamed: 0": "Record ID"})
+
+            if filter_records is not None:
+                dataframe = dataframe[
+                    dataframe["Record ID"].astype(str).isin(filter_records)
+                ]
 
             if dtype == "dde":
                 sea.kdeplot(
