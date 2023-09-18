@@ -1,5 +1,7 @@
 import subprocess
 
+import numpy as np
+
 from main import plot
 
 
@@ -23,19 +25,29 @@ def plot_tm():
 
 
 def plot_espaloma():
+    records = np.loadtxt(
+        "/home/brent/omsf/projects/espaloma/output/esp-tors-10/t140.records",
+        dtype=str,
+    )
     plot(
         "/tmp",
         [
             "output/industry/esp-tors-10",
-            "output/industry/esp-full",
+            # "output/industry/esp-full",
             "output/industry/sage-2.1.0",
         ],
-        names=["esp-tors-10", "esp-full", "Sage"],
+        names=[
+            #
+            "esp-tors-10",
+            # "esp-full",
+            "Sage",
+        ],
+        filter_records=records,
     )
 
 
-plot_tm()
-# plot_espaloma()
+# plot_tm()
+plot_espaloma()
 subprocess.run(
     [
         "montage",
