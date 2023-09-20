@@ -1,8 +1,7 @@
 # more plots of data, trying to figure out why adding TM data worsens the FF
 # quality
 
-import importlib
-import sys
+import logging
 from collections import defaultdict
 
 import click
@@ -15,10 +14,9 @@ from openff.toolkit import Molecule
 from rdkit.Chem.Draw import rdDepictor, rdMolDraw2D
 from rdkit.Chem.rdmolops import RemoveHs
 from tqdm import tqdm
+from vflib.draw import draw_rdkit
 
-sys.path.append("..")
-sys.path.append("../known-issues/")
-known_issues = importlib.import_module("known-issues.main")
+logging.getLogger("openff").setLevel(logging.ERROR)
 
 
 # adapted from known-issues before the highlight stuff
@@ -64,17 +62,17 @@ def main(eps, draw, cmp):
 
 
 def inner(eps, draw, cmp):
-    tm = pd.read_csv("output/industry/dde.csv").rename(
+    tm = pd.read_csv("output/industry/sage-tm/dde.csv").rename(
         columns={"difference": "TM"}
     )
-    sage_tm = pd.read_csv("output/industry/sage/dde.csv").rename(
+    sage_tm = pd.read_csv("output/industry/sage-tm/dde.csv").rename(
         columns={"difference": "Sage TM"}
     )
-    sage_sage = pd.read_csv("output/industry/sage_sage/dde.csv").rename(
+    sage = pd.read_csv("output/industry/sage-2.1.0/dde.csv").rename(
         columns={"difference": "Sage"}
     )
 
-    data = tm.merge(sage_tm).merge(sage_sage)
+    data = tm.merge(sage_tm).merge(sage)
 
     # hilarious
     data = data.rename(columns={"Unnamed: 0": "Record ID"})
@@ -119,7 +117,7 @@ def inner(eps, draw, cmp):
                 counts[i] = 1
                 if draw:
                     print(f"drawing mol {i}-{s}")
-                    known_issues.draw_rdkit(
+                    draw_rdkit(
                         mol, f"debug/mol{i}-{s}.png", smirks, max_matches=1
                     )
                 else:
