@@ -11,14 +11,14 @@ def plot_tm():
         [
             "output/industry/tm",
             "output/industry/sage-tm",
-            # "output/industry/sage-sage",
+            "output/industry/sage-sage",
             "output/industry/sage-2.1.0",
         ],
         names=[
             #
-            "TM",
-            "Sage TM",
-            # "My Sage",
+            "TM-TM",
+            "Sage-TM",
+            "Sage-Sage",
             "Sage",
         ],
     )
@@ -47,7 +47,7 @@ def plot_espaloma():
 
 
 plot_tm()
-#plot_espaloma()
+# plot_espaloma()
 subprocess.run(
     [
         "montage",
