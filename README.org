@@ -30,8 +30,9 @@
      python main.py \
 	    --forcefield force-field.offxml \
 	    --dataset datasets/industry.json \
-	    --db-file tmp.sqlite \
-	    --out-dir .
+	    --sqlite-file tmp.sqlite \
+	    --out-dir . \
+	    --procs 16
    #+end_src
 
    In both cases, the forcefield to benchmark is taken from ~force-field.offxml~

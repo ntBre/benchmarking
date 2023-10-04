@@ -22,26 +22,29 @@ warnings.filterwarnings(
 
 
 @click.command()
-@click.option("--forcefield", default="force-field.offxml")
-@click.option("--dataset", default="datasets/industry.json")
-@click.option("--db-file", default="tmp.sqlite")
-@click.option("--out-dir", default=".")
-def main(forcefield, dataset, db_file, out_dir):
-    if os.path.exists(db_file):
-        print(f"loading existing database from {db_file}")
-        store = MoleculeStore(db_file)
+@click.option("--forcefield", "-f", default="force-field.offxml")
+@click.option("--dataset", "-d", default="datasets/industry.json")
+@click.option("--sqlite-file", "-s", default="tmp.sqlite")
+@click.option("--out-dir", "-o", default=".")
+@click.option("--procs", "-p", default=16)
+@click.option("--invalidate-cache", "-i", is_flag=True, default=False)
+def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
+    if invalidate_cache:
+        os.remove(sqlite_file)
+    if os.path.exists(sqlite_file):
+        print(f"loading existing database from {sqlite_file}")
+        store = MoleculeStore(sqlite_file)
     else:
         print(f"loading initial dataset from {dataset}")
         opt = OptimizationResultCollection.parse_file(dataset)
 
-        print(f"generating database, saving to {db_file}")
-        store = MoleculeStore.from_qcsubmit_collection(opt, db_file)
+        print(f"generating database, saving to {sqlite_file}")
+        store = MoleculeStore.from_qcsubmit_collection(opt, sqlite_file)
 
     print("started optimizing store")
     start = time.time()
-    store.optimize_mm(force_field=forcefield, n_processes=16)
-    end = time.time()
-    print(f"finished optimizing after {end - start} sec")
+    store.optimize_mm(force_field=forcefield, n_processes=procs)
+    print(f"finished optimizing after {time.time() - start} sec")
 
     store.get_dde(forcefield).to_csv(f"{out_dir}/dde.csv")
     store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")

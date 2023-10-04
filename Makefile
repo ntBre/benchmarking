@@ -18,7 +18,7 @@ $(addprefix output/%/$(TARGET)/,$(csvs) $(pngs)) %.sqlite: datasets/%.json main.
 # DO NOT run M-x align here, it adds spaces around the bash =
 	base=$(basename $(notdir $<));					\
 	mkdir -p output/$$base/$(TARGET);				\
-	python main.py --dataset $< --db-file $$base.$(TARGET).sqlite	\
+	python main.py --dataset $< --sqlite-file $$base.$(TARGET).sqlite	\
 		--out-dir output/$$base/$(TARGET)			\
 		--forcefield $(forcefield)
 
@@ -29,7 +29,7 @@ output/%/$(TARGET)/out.png: $(addprefix output/%/$(TARGET)/,$(pngs))
 .PHONY: temp
 temp:
 	python main.py --dataset datasets/small-opt.json \
-		--db-file $$(mktemp -d)/tmp.sqlite --out-dir /tmp
+		--sqlite-file $$(mktemp -d)/tmp.sqlite --out-dir /tmp
 
 ARGS =
 .PHONY: debug
