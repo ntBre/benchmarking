@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J espaloma-bench
 #SBATCH -p standard
-#SBATCH -t 144:00:00
+#SBATCH -t 124:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=64gb
