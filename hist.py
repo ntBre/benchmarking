@@ -1,10 +1,9 @@
-# attributing errors to each parameter
+# associating records with parameters
 
 import json
 import logging
 from collections import defaultdict
 
-import pandas as pd
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.toolkit import ForceField, Molecule
 from tqdm import tqdm
@@ -31,10 +30,6 @@ class Record:
 
 
 logging.getLogger("openff").setLevel(logging.ERROR)
-
-tm = pd.read_csv("output/industry/tm/dde.csv").rename(
-    columns={"difference": "TM", "Unnamed: 0": "Record ID"}
-)
 
 ds = OptimizationResultCollection.parse_file("datasets/industry.json")
 data = [v for value in ds.entries.values() for v in value]
