@@ -12,11 +12,11 @@ from tqdm import tqdm
 class Record:
     def __init__(self, bonds=None, angles=None, torsions=None):
         if bonds is None:
-            bonds = []
+            bonds = defaultdict(int)
         if angles is None:
-            angles = []
+            angles = defaultdict(int)
         if torsions is None:
-            torsions = []
+            torsions = defaultdict(int)
         self.bonds = bonds
         self.angles = angles
         self.torsions = torsions
@@ -65,11 +65,11 @@ def main():
     for rec_id, mol in tqdm(pairs, total=len(data), desc="Processing"):
         labels = ff.label_molecules(mol.to_topology())[0]
         for bond in labels["Bonds"].values():
-            records[rec_id].bonds.append(bond.id)
+            records[rec_id].bonds[bond.id] += 1
         for angle in labels["Angles"].values():
-            records[rec_id].angles.append(angle.id)
+            records[rec_id].angles[angle.id] += 1
         for torsion in labels["ProperTorsions"].values():
-            records[rec_id].torsions.append(torsion.id)
+            records[rec_id].torsions[torsion.id] += 1
 
     with open("hist.json", "w") as out:
         json.dump(records, out, indent=2, default=Record.to_json)
