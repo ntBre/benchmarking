@@ -2,6 +2,7 @@ import csv
 import re
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
@@ -36,8 +37,40 @@ def summary(items, label):
         vals = items[key]
         avg = np.average(vals)
         std = np.std(vals)
-        print(f"{key:<5}{avg:12.4f}{std:12.4f}")
+        min = np.min(vals)
+        max = np.max(vals)
+        print(f"{key:<5}{avg:12.4f}{std:12.4f}{min:12.4f}{max:12.4f}")
     print()
+
+
+def plot(params, filename):
+    keys = sorted(params.keys(), key=sort_label)
+    nkeys = len(keys)
+    vals = [params[k] for k in keys]
+    bsize = 40
+    for i in range(0, nkeys, bsize):
+        fig, ax = plt.subplots()
+        end = min(i + bsize, nkeys)
+        bp = ax.boxplot(
+            vals[i:end],
+            # whis=(0, 100),
+            flierprops={
+                "marker": "o",
+                "markersize": 1,
+                "markerfacecolor": "black",
+            },
+        )
+        for m in bp["medians"]:
+            m.set_color("blue")
+        ax.set_xticklabels(keys[i:end], rotation=270)
+        # ax.set_ylim(-8, 12)
+        plt.xlabel("Parameter")
+        plt.ylabel("DDE (kcal mol$^{-1}$)")
+        # ax.set_title("Errors by parameter (whiskers are range)")
+        ax.set_title("Errors by parameter")
+        plt.tight_layout()
+        plt.savefig(filename.format(i), dpi=300)
+        plt.close()
 
 
 records = Record.from_file("hist.json")
@@ -52,13 +85,13 @@ torsions = defaultdict(list)
 
 for rec, diff in tqdm(tm.items(), desc="Parsing hist", total=len(tm)):
     rec = records[rec]
-    for bond in rec.bonds:
-        bonds[bond].append(diff)
+    for bond, count in rec.bonds.items():
+        bonds[bond].extend([diff] * count)
     for angle in rec.angles:
-        angles[angle].append(diff)
+        angles[angle].extend([diff] * count)
     for torsion in rec.torsions:
-        torsions[torsion].append(diff)
+        torsions[torsion].extend([diff] * count)
 
-summary(bonds, "Bonds")
-summary(angles, "Angles")
-summary(torsions, "Torsions")
+for name in ["bonds", "angles", "torsions"]:
+    # summary(globals()[name], name.title())
+    plot(globals()[name], "hist/" + name + "{:03d}.png")
