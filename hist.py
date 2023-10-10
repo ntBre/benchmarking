@@ -29,9 +29,9 @@ class Record:
 
     def to_json(self):
         return dict(
-            bonds=list(self.bonds),
-            angles=list(self.angles),
-            torsions=list(self.torsions),
+            bonds=self.bonds,
+            angles=self.angles,
+            torsions=self.torsions,
         )
 
     def from_file(filename):
