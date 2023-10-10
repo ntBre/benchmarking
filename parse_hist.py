@@ -73,25 +73,30 @@ def plot(params, filename):
         plt.close()
 
 
-records = Record.from_file("hist.json")
+def main():
+    records = Record.from_file("hist.json")
 
-tm = read_csv("output/industry/tm/dde.csv")
+    tm = read_csv("output/industry/tm/dde.csv")
 
-# these are dicts of parameter_id -> error, where error is a list of all errors
-# for molecules containing these ids
-bonds = defaultdict(list)
-angles = defaultdict(list)
-torsions = defaultdict(list)
+    # these are dicts of parameter_id -> error, where error is a list of all
+    # errors for molecules containing these ids
+    bonds = defaultdict(list)
+    angles = defaultdict(list)
+    torsions = defaultdict(list)
 
-for rec, diff in tqdm(tm.items(), desc="Parsing hist", total=len(tm)):
-    rec = records[rec]
-    for bond, count in rec.bonds.items():
-        bonds[bond].extend([diff] * count)
-    for angle in rec.angles:
-        angles[angle].extend([diff] * count)
-    for torsion in rec.torsions:
-        torsions[torsion].extend([diff] * count)
+    for rec, diff in tqdm(tm.items(), desc="Parsing hist", total=len(tm)):
+        rec = records[rec]
+        for bond, count in rec.bonds.items():
+            bonds[bond].extend([diff] * count)
+        for angle, count in rec.angles.items():
+            angles[angle].extend([diff] * count)
+        for torsion, count in rec.torsions.items():
+            torsions[torsion].extend([diff] * count)
 
-for name in ["bonds", "angles", "torsions"]:
-    # summary(globals()[name], name.title())
-    plot(globals()[name], "hist/" + name + "{:03d}.png")
+    for name in ["bonds", "angles", "torsions"]:
+        # summary(locals()[name], name.title())
+        plot(locals()[name], "hist/" + name + "{:03d}.png")
+
+
+if __name__ == "__main__":
+    main()
