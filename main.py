@@ -29,7 +29,7 @@ warnings.filterwarnings(
 @click.option("--procs", "-p", default=16)
 @click.option("--invalidate-cache", "-i", is_flag=True, default=False)
 def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
-    if invalidate_cache:
+    if invalidate_cache and os.path.exists(sqlite_file):
         os.remove(sqlite_file)
     if os.path.exists(sqlite_file):
         print(f"loading existing database from {sqlite_file}")
