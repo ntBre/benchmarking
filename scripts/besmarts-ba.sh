@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH -J espaloma-bench
+#SBATCH -J besmarts-ba-bench
 #SBATCH -p standard
 #SBATCH -t 24:00:00
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
 #SBATCH --mem=64gb
 #SBATCH --account dmobley_lab
 #SBATCH --export ALL
@@ -14,14 +14,14 @@ date
 hostname
 
 source ~/.bashrc
-mamba activate ib-dev-esp
+mamba activate ib-dev-new
 
 python main.py \
-       --forcefield espaloma-openff_unconstrained-2.1.0 \
+       --forcefield forcefields/besmarts-ba.offxml \
        --dataset datasets/industry.json \
-       --sqlite-file espaloma.sqlite \
-       --out-dir output/industry/espaloma \
-       --procs 16 \
+       --sqlite-file besmarts-ba.sqlite \
+       --out-dir output/industry/besmarts-ba \
+       --procs 32
        --invalidate-cache
 
 date
