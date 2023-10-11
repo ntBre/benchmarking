@@ -51,13 +51,14 @@ def plot(lens, title, filename):
 
 
 class Diff:
-    def __init__(self, start, end, eps, out_dir=None):
+    def __init__(self, start, end, eps, plot, out_dir=None):
         def load(ff):
             return ForceField(ff, allow_cosmetic_attributes=True)
 
         self.start = load(start)
         self.end = load(end)
         self.eps = eps
+        self.plot = plot
         if out_dir is None:
             out_dir = "."
         if not os.path.exists(out_dir):
@@ -91,24 +92,27 @@ class Diff:
 
     def check_bonds(self):
         vals = self.check("Bonds", ["k", "length"])
-        plot(vals["k"], "Bond k", f"{self.out_dir}/bond-k.png")
-        plot(vals["length"], "Bond Len", f"{self.out_dir}/bond-len.png")
+        if self.plot:
+            plot(vals["k"], "Bond k", f"{self.out_dir}/bond-k.png")
+            plot(vals["length"], "Bond Len", f"{self.out_dir}/bond-len.png")
 
     def check_angles(self):
         vals = self.check("Angles", ["k", "angle"])
-        plot(vals["k"], "Angle k", f"{self.out_dir}/angle-k.png")
-        plot(vals["angle"], "Angle", f"{self.out_dir}/angle.png")
+        if self.plot:
+            plot(vals["k"], "Angle k", f"{self.out_dir}/angle-k.png")
+            plot(vals["angle"], "Angle", f"{self.out_dir}/angle.png")
 
     def check_torsions(self):
         vals = self.check(
             "ProperTorsions", ["k1", "k2", "k3", "k4", "k5", "k6"]
         )
-        for i in range(1, 7):
-            plot(
-                vals[f"k{i}"],
-                f"Torsion k{i}",
-                f"{self.out_dir}/torsion-k{i}.png",
-            )
+        if self.plot:
+            for i in range(1, 7):
+                plot(
+                    vals[f"k{i}"],
+                    f"Torsion k{i}",
+                    f"{self.out_dir}/torsion-k{i}.png",
+                )
 
 
 # example usage:
@@ -118,10 +122,11 @@ class Diff:
 @click.command()
 @click.option("--start", "-s", help="name of the initial force field")
 @click.option("--end", "-e", help="name of the final force field")
-@click.option("--out-dir", "-o", help="where to write output")
+@click.option("--out-dir", "-o", help="where to write plots", default=None)
 @click.option("--eps", help="threshold for printing differences", default=0.0)
-def main(start, end, eps, out_dir):
-    diff = Diff(start, end, eps, out_dir)
+@click.option("--plot", "-p", is_flag=True, default=False)
+def main(start, end, eps, plot, out_dir):
+    diff = Diff(start, end, eps, plot, out_dir)
     diff.check_bonds()
     diff.check_angles()
     diff.check_torsions()
