@@ -46,6 +46,9 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
     store.optimize_mm(force_field=forcefield, n_processes=procs)
     print(f"finished optimizing after {time.time() - start} sec")
 
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
     store.get_dde(forcefield).to_csv(f"{out_dir}/dde.csv")
     store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")
     store.get_tfd(forcefield).to_csv(f"{out_dir}/tfd.csv")
