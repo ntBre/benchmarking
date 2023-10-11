@@ -3,6 +3,7 @@
 # determine changes between starting and ending parameters for a force field
 
 import math
+import os
 from collections import defaultdict
 
 import click
@@ -47,12 +48,18 @@ def plot(lens, title, filename):
 
 
 class Diff:
-    def __init__(self, start, end):
+    def __init__(self, start, end, eps, out_dir=None):
         def load(ff):
             return ForceField(ff, allow_cosmetic_attributes=True)
 
         self.start = load(start)
         self.end = load(end)
+        self.eps = eps
+        if out_dir is None:
+            out_dir = "."
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        self.out_dir = out_dir
 
     def check(self, param, attrs):
         hs = self.start.get_parameter_handler(param)
@@ -60,35 +67,41 @@ class Diff:
 
         ret = defaultdict(list)
         for s in hs:
-            if "parameterize" not in s._cosmetic_attribs:
-                continue
             e = he.get_parameter(dict(id=s.id))[0]
             for attr in attrs:
                 f = getattr(e, attr, None)
                 i = getattr(s, attr, None)
                 if f is None or i is None:
                     continue
+                i = i.to(f.units)
                 assert f.units == i.units
-                ret[attr].append((s.id, (f - i).magnitude))
+                diff = (f - i).magnitude
+                if abs(diff) > self.eps:
+                    print(f"{s.id:<5}{diff:12.4f}")
+                ret[attr].append((s.id, diff))
 
         return ret
 
     def check_bonds(self):
         vals = self.check("Bonds", ["k", "length"])
-        plot(vals["k"], "Bond k", "change/bond-k.png")
-        plot(vals["length"], "Bond Len", "change/bond-len.png")
+        plot(vals["k"], "Bond k", f"{self.out_dir}/bond-k.png")
+        plot(vals["length"], "Bond Len", f"{self.out_dir}/bond-len.png")
 
     def check_angles(self):
         vals = self.check("Angles", ["k", "angle"])
-        plot(vals["k"], "Angle k", "change/angle-k.png")
-        plot(vals["angle"], "Angle", "change/angle.png")
+        plot(vals["k"], "Angle k", f"{self.out_dir}/angle-k.png")
+        plot(vals["angle"], "Angle", f"{self.out_dir}/angle.png")
 
     def check_torsions(self):
         vals = self.check(
             "ProperTorsions", ["k1", "k2", "k3", "k4", "k5", "k6"]
         )
         for i in range(1, 7):
-            plot(vals[f"k{i}"], f"Torsion k{i}", f"change/torsion-k{i}.png")
+            plot(
+                vals[f"k{i}"],
+                f"Torsion k{i}",
+                f"{self.out_dir}/torsion-k{i}.png",
+            )
 
 
 # example usage:
@@ -98,8 +111,10 @@ class Diff:
 @click.command()
 @click.option("--start", "-s", help="name of the initial force field")
 @click.option("--end", "-e", help="name of the final force field")
-def main(start, end):
-    diff = Diff(start, end)
+@click.option("--out-dir", "-o", help="where to write output")
+@click.option("--eps", help="threshold for printing differences", default=0.0)
+def main(start, end, eps, out_dir):
+    diff = Diff(start, end, eps, out_dir)
     diff.check_bonds()
     diff.check_angles()
     diff.check_torsions()
