@@ -6,12 +6,21 @@ import matplotlib.pyplot as plt
 from openff.toolkit import ForceField
 
 
-def plot(lens, title, filename):
-    fig, ax = plt.subplots(figsize=(12, 3))
-    ids, lens = zip(*lens)
+def inner(ax, ids, lens, title):
     ax.bar(ids, lens)
     ax.set_xticklabels(ids, rotation=270)
     ax.set_title(title)
+
+
+def plot(lens, title, filename):
+    fig, ax = plt.subplots(figsize=(12, 12))
+    ids, lens = zip(*lens)
+    chunk = 20
+    ll = len(lens)
+    for i in range(0, ll, chunk):
+        end = min(i + chunk, ll)
+        ax1 = plt.subplot(5, 2, i // chunk + 1)
+        inner(ax1, ids[i:end], lens[i:end], title)
     fig.tight_layout()
     plt.savefig(filename, dpi=300)
     plt.close()
@@ -66,6 +75,4 @@ def check_torsions():
 if __name__ == "__main__":
     check_bonds()
     check_angles()
-    # TODO fix torsion mismatch for some missing k values, probably group id
-    # with the other measures
     check_torsions()
