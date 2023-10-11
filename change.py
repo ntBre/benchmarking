@@ -4,11 +4,14 @@
 
 import math
 import os
+import warnings
 from collections import defaultdict
 
 import click
 import matplotlib.pyplot as plt
 from openff.toolkit import ForceField
+
+warnings.filterwarnings("ignore")
 
 
 def inner(ax, ids, lens, title):
@@ -75,10 +78,14 @@ class Diff:
                     continue
                 i = i.to(f.units)
                 assert f.units == i.units
-                diff = (f - i).magnitude
-                if abs(diff) > self.eps:
-                    print(f"{s.id:<5}{diff:12.4f}")
-                ret[attr].append((s.id, diff))
+                d = (f - i).magnitude
+                if abs(d) > self.eps:
+                    end = f.magnitude
+                    start = i.magnitude
+                    print(
+                        f"{s.id:<5}{attr:<8}{start:12.4f}{end:12.4f}{d:12.4f}"
+                    )
+                ret[attr].append((s.id, d))
 
         return ret
 
