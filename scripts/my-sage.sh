@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -J my-sage-bench
 #SBATCH -p standard
-#SBATCH -t 24:00:00
+#SBATCH -t 84:00:00
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=32gb
 #SBATCH --account dmobley_lab
 #SBATCH --export ALL
@@ -21,7 +21,7 @@ python main.py \
        --dataset datasets/industry.json \
        --sqlite-file my-sage.sqlite \
        --out-dir output/industry/my-sage-2.1.0 \
-       --procs 16 \
+       --procs 8 \
        --invalidate-cache
 
 date
