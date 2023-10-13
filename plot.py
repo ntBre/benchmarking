@@ -46,8 +46,24 @@ def plot_espaloma():
     )
 
 
-plot_tm()
+def plot_besmarts():
+    plot(
+        "/tmp",
+        [
+            "output/industry/besmarts-ba",
+            "output/industry/sage-2.1.0",
+        ],
+        names=[
+            #
+            "besmarts ba",
+            "Sage",
+        ],
+    )
+
+
+# plot_tm()
 # plot_espaloma()
+plot_besmarts()
 subprocess.run(
     [
         "montage",
