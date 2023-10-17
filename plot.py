@@ -1,7 +1,5 @@
 import subprocess
 
-import numpy as np
-
 from main import plot
 
 
@@ -9,40 +7,38 @@ def plot_tm():
     plot(
         "/tmp",
         [
-            "output/industry/tm",
-            "output/industry/sage-tm",
+            # "output/industry/tm",
+            # "output/industry/sage-tm",
             "output/industry/sage-sage",
+            "output/industry/my-sage-2.1.0",
             "output/industry/sage-2.1.0",
         ],
         names=[
-            #
-            "TM-TM",
-            "Sage-TM",
+            # "TM-TM",
+            # "Sage-TM",
             "Sage-Sage",
+            "My Sage 2.1.0",  # my environment (-oe) on sage 2.1.0 input files
             "Sage",
         ],
     )
 
 
 def plot_espaloma():
-    records = np.loadtxt(
-        "/home/brent/omsf/projects/espaloma/output/esp-tors-10/t140.records",
-        dtype=str,
-    )
     plot(
         "/tmp",
         [
-            "output/industry/esp-tors-10",
-            # "output/industry/esp-full",
+            # "output/industry/esp-tors-10",
+            "output/industry/esp-full",
             "output/industry/sage-2.1.0",
+            "output/industry/espaloma",
         ],
         names=[
             #
-            "esp-tors-10",
-            # "esp-full",
+            # "esp-tors-10",
+            "esp-full",
             "Sage",
+            "Espaloma",
         ],
-        filter_records=records,
     )
 
 
@@ -52,18 +48,20 @@ def plot_besmarts():
         [
             "output/industry/besmarts-ba",
             "output/industry/sage-2.1.0",
+            "output/industry/espaloma",
         ],
         names=[
             #
             "besmarts ba",
             "Sage",
+            "Espaloma",
         ],
     )
 
 
-# plot_tm()
+plot_tm()
 # plot_espaloma()
-plot_besmarts()
+# plot_besmarts()
 subprocess.run(
     [
         "montage",
