@@ -20,7 +20,7 @@ python main.py \
        --forcefield forcefields/pavan-2.1.0.offxml \
        --dataset datasets/industry.json \
        --sqlite-file pavan.sqlite \
-       --out-dir output/industry/pavan-2.1.0 \
+       --out-dir output/industry/pavan-2.1.0-repeat \
        --procs 8 \
        --invalidate-cache
 
