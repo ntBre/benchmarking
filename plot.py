@@ -19,7 +19,7 @@ def plot_tm():
             # "Sage-TM",
             "Sage-Sage",
             "My Sage 2.1.0",  # my environment (-oe) on sage 2.1.0 input files
-            "Pavan env", # pavan's env with sage 2.1.0 input files
+            "Pavan env",  # pavan's env with sage 2.1.0 input files
             "Sage",
         ],
     )
