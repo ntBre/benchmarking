@@ -9,18 +9,20 @@ def plot_tm():
         [
             # "output/industry/tm",
             # "output/industry/sage-tm",
-            "output/industry/sage-sage",
-            "output/industry/my-sage-2.1.0",
+            # "output/industry/sage-sage",
+            # "output/industry/my-sage-2.1.0",
             "output/industry/pavan-2.1.0",
-            "output/industry/sage-2.1.0",
+            "output/industry/pavan-2.1.0-repeat",
+            # "output/industry/sage-2.1.0",
         ],
         names=[
             # "TM-TM",
             # "Sage-TM",
-            "Sage-Sage",
-            "My Sage 2.1.0",  # my environment (-oe) on sage 2.1.0 input files
+            # "Sage-Sage",
+            # "My Sage 2.1.0",  # my environment (-oe) on sage 2.1.0 input files
             "Pavan env",  # pavan's env with sage 2.1.0 input files
-            "Sage",
+            "Pavan env bench 2",  # repeated only the benchmark
+            # "Sage",
         ],
     )
 
