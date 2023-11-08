@@ -13,26 +13,33 @@ def plot_tm():
     plot(
         "/tmp",
         [
-            # "output/industry/tm",
+            "output/industry/tm",
+            "output/industry/tm-new",
             # "output/industry/sage-tm",
             # "output/industry/sage-sage",
             # "output/industry/my-sage-2.1.0",
-            "output/industry/pavan-2.1.0",
-            "output/industry/pavan-repeat",
+            # "output/industry/pavan-2.1.0",
+            # "output/industry/pavan-repeat",
             # "output/industry/pavan-2.1.0-repeat",
             "output/industry/sage-2.1.0",
         ],
         names=[
-            # "TM-TM",
+            "TM-TM",
+            "TM-TM new",
             # "Sage-TM",
             # "Sage-Sage",
             # "My Sage 2.1.0",  # my environment (-oe) on sage 2.1 input files
-            "Pavan env",  # pavan's env with sage 2.1.0 input files
-            "Pavan repeat",  # pavan's env with sage 2.1.0 input files again
+            # "Pavan env",  # pavan's env with sage 2.1.0 input files
+            # "Pavan repeat",  # pavan's env with sage 2.1.0 input files again
             # "Pavan env bench 2",  # repeated only the benchmark
             "Sage",
         ],
     )
+
+
+def plot_repro():
+    "Three runs of Sage 2.1.0 refit with Pavan's env and input files"
+    plotter(["pavan-2.1.0", "pavan-repeat", "sage-2.1.0"])
 
 
 def plot_espaloma():
@@ -44,18 +51,27 @@ def plot_besmarts():
 
 
 def plot_msm():
-    plotter(["sage-2.1.0", "msm"])
+    plotter(
+        [
+            "sage-2.1.0",
+            "msm",
+            "msm-split",
+        ]
+    )
 
 
 def sage_sage():
     plotter(["sage-sage", "sage-sage-new", "my-sage-2.1.0", "sage-2.1.0"])
 
 
-plot_tm()
+# plot_tm()
 # plot_espaloma()
 # plot_besmarts()
 # plot_msm()
 # sage_sage()
+# plot_repro()
+
+plotter(["my-sage-2.1.0", "pavan-2.1.0", "pavan-repeat", "sage-2.1.0"])
 
 subprocess.run(
     [
