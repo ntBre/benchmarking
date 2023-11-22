@@ -43,7 +43,7 @@ def plot_repro():
 
 
 def plot_espaloma():
-    plotter(["esp-full", "sage-2.1.0", "espaloma"])
+    plotter(["esp-full", "esp-full-full", "sage-2.1.0", "espaloma"])
 
 
 def plot_besmarts():
@@ -65,13 +65,13 @@ def sage_sage():
 
 
 # plot_tm()
-# plot_espaloma()
+plot_espaloma()
 # plot_besmarts()
 # plot_msm()
 # sage_sage()
 # plot_repro()
 
-plotter(["my-sage-2.1.0", "pavan-2.1.0", "pavan-repeat", "sage-2.1.0"])
+# plotter(["my-sage-2.1.0", "pavan-2.1.0", "pavan-repeat", "sage-2.1.0"])
 
 subprocess.run(
     [
