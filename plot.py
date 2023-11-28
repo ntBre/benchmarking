@@ -43,7 +43,20 @@ def plot_repro():
 
 
 def plot_espaloma():
-    plotter(["esp-full", "esp-full-full", "sage-2.1.0", "espaloma"])
+    plotter(
+        [
+            "esp-full",
+            "esp-full-refit",
+            # "esp-full-full",
+            "sage-2.1.0",
+            # "espaloma",
+        ],
+        names=[
+            "Espaloma bond and angle force constants",
+            "Espaloma bond and angle force constants, refit",
+            "Sage 2.1.0",
+        ],
+    )
 
 
 def plot_besmarts():
