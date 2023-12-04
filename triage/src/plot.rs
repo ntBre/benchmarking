@@ -6,7 +6,10 @@ use image::{Rgb, RgbImage};
 
 use crate::{histogram::Histogram, plot::convert::Converter, point};
 
-use self::point::Point;
+use self::{
+    color::{rgb, BLACK, BLUE, CYAN, GREEN, MAGENTA, RED},
+    point::Point,
+};
 
 mod color {
     use image::Rgb;
@@ -120,9 +123,7 @@ impl Plot {
     pub fn new(width: u32, height: u32) -> Self {
         Self {
             img: RgbImage::from_pixel(width, height, color::rgb(0xe2e2e2)),
-            cur: Cursor {
-                col: color::rgb(0xff0000),
-            },
+            cur: Cursor { col: BLACK },
         }
     }
 
@@ -142,6 +143,7 @@ impl Plot {
         let h = mh * 1 / 10;
         self.rect(point!(w, h), point!(mw - w, mh - h));
 
+        // TODO make buf a fraction of something
         let buf = 10;
         let conv = Converter {
             dminx: hist.min,
@@ -154,13 +156,20 @@ impl Plot {
             cmaxy: mh - h,
         };
 
+        self.set_color(rgb(0xff88ff));
+
+        // TODO small gaps between bars
         let bin_width = (hist.max - hist.min) / hist.counts.len() as f64;
         for (i, bin) in hist.counts.iter().enumerate() {
             let start = i as f64 * bin_width;
             let end = (i + 1) as f64 * bin_width;
             let p1 = conv.to_canvas(point!(start, *bin as f64));
             let p2 = conv.to_canvas(point!(end, 0.0));
+            self.fill(p1, p2);
+            let old = self.cur.col;
+            self.set_color(BLACK);
             self.rect(p1, p2);
+            self.set_color(old);
         }
     }
 
