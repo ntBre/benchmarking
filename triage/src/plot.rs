@@ -158,7 +158,6 @@ impl Plot {
 
         self.set_color(rgb(0xff88ff));
 
-        // TODO small gaps between bars
         let bin_width = (hist.max - hist.min) / hist.counts.len() as f64;
         for (i, bin) in hist.counts.iter().enumerate() {
             let start = i as f64 * bin_width;
