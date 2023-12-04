@@ -6,6 +6,8 @@ use image::{Rgb, RgbImage};
 
 use crate::{histogram::Histogram, plot::convert::Converter, point};
 
+use self::point::Point;
+
 mod color {
     use image::Rgb;
 
@@ -25,13 +27,14 @@ mod color {
 }
 
 mod point {
-    pub(crate) struct Point {
-        pub(crate) x: u32,
-        pub(crate) y: u32,
+    #[derive(Debug)]
+    pub(crate) struct Point<T> {
+        pub(crate) x: T,
+        pub(crate) y: T,
     }
 
-    impl Point {
-        pub(crate) fn new(x: u32, y: u32) -> Self {
+    impl<T> Point<T> {
+        pub(crate) fn new(x: T, y: T) -> Self {
             Self { x, y }
         }
     }
@@ -47,8 +50,11 @@ mod point {
 mod convert {
     //! Convert between data and canvas dimensions
 
+    use super::point::Point;
+
     /// fields prefixed with a `d` refer to numerical data, while those prefixed
     /// with a `c` refer to canvas coordinates
+    #[derive(Debug)]
     pub(crate) struct Converter {
         pub(crate) dminx: f64,
         pub(crate) dmaxx: f64,
@@ -58,6 +64,42 @@ mod convert {
         pub(crate) cmaxx: u32,
         pub(crate) cminy: u32,
         pub(crate) cmaxy: u32,
+    }
+
+    impl Converter {
+        /// returns the width and height of the canvas
+        const fn canvas_dimensions(&self) -> (u32, u32) {
+            (self.cmaxx - self.cminx, self.cmaxy - self.cminy)
+        }
+
+        /// returns the width and height of the data
+        fn data_dimensions(&self) -> (f64, f64) {
+            (self.dmaxx - self.dminx, self.dmaxy - self.dminy)
+        }
+
+        /// convert `p` to canvas units
+        pub(crate) fn to_canvas(&self, p: Point<f64>) -> Point<u32> {
+            let (cw, ch) = self.canvas_dimensions();
+            let (dw, dh) = self.data_dimensions();
+            let fx = p.x / dw; // fraction of data x
+            let fy = p.y / dh; // fraction of data y
+
+            // fractional x and y values
+            let x = fx * cw as f64;
+            let y = fy * ch as f64;
+
+            // translate based on minimum canvas position and invert y
+            let x = x + self.cminx as f64;
+            let y = self.cmaxy as f64 - y;
+
+            // considered clamping to canvas dimensions here, but it seems
+            // better just to overflow and not draw rather than saturate to the
+            // edges
+            Point {
+                x: x as u32,
+                y: y as u32,
+            }
+        }
     }
 }
 
@@ -96,33 +138,36 @@ impl Plot {
         let h = mh * 1 / 10;
         self.rect(point!(w, h), point!(mw - w, mh - h));
 
-        // map between data units and plot units
-        println!("{}..{} vs {}..{}", hist.min, hist.max, w, mw - w);
-        println!(
-            "0..{} vs {h}..{}",
-            hist.counts.iter().max().unwrap(),
-            mh - h
-        );
-
         let conv = Converter {
             dminx: hist.min,
             dmaxx: hist.max,
             dminy: 0.0,
             dmaxy: *hist.counts.iter().max().unwrap() as f64,
-            cminx: todo!(),
-            cmaxx: todo!(),
-            cminy: todo!(),
-            cmaxy: todo!(),
+            cminx: w,
+            cmaxx: mw - w,
+            cminy: h,
+            cmaxy: mh - h,
         };
+
+        let bin_width = (hist.max - hist.min) / hist.counts.len() as f64;
+        for (i, bin) in hist.counts.iter().enumerate() {
+            println!("{i} => {bin}");
+            let start = i as f64 * bin_width;
+            let end = (i + 1) as f64 * bin_width;
+
+            let p1 = conv.to_canvas(point!(start, *bin as f64));
+            let p2 = conv.to_canvas(point!(end, 0.0));
+            self.rect(p1, p2);
+        }
     }
 
     // primitives
 
     /// draws an empty rectangle from the upper left corner (`p1`) to the lower
     /// right corner (`p2`), inclusive of the endpoints using the current color
-    fn rect(&mut self, p1: point::Point, p2: point::Point) {
-        let point::Point { x: x1, y: y1 } = p1;
-        let point::Point { x: x2, y: y2 } = p2;
+    fn rect(&mut self, p1: Point<u32>, p2: Point<u32>) {
+        let Point { x: x1, y: y1 } = p1;
+        let Point { x: x2, y: y2 } = p2;
 
         // horizontal lines
         for x in x1..=x2 {
@@ -138,9 +183,9 @@ impl Plot {
 
     /// draws a filled rectangle from the upper left corner (`p1`) to the lower
     /// right corner (`p2`), inclusive of the endpoints using the current color
-    fn fill(&mut self, p1: point::Point, p2: point::Point) {
-        let point::Point { x: x1, y: y1 } = p1;
-        let point::Point { x: x2, y: y2 } = p2;
+    fn fill(&mut self, p1: Point<u32>, p2: Point<u32>) {
+        let Point { x: x1, y: y1 } = p1;
+        let Point { x: x2, y: y2 } = p2;
 
         // horizontal lines
         for x in x1..=x2 {
