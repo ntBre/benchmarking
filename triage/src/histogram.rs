@@ -1,8 +1,8 @@
 #[derive(Debug, PartialEq)]
 pub struct Histogram {
-    min: f64,
-    max: f64,
-    counts: Vec<usize>,
+    pub(crate) min: f64,
+    pub(crate) max: f64,
+    pub(crate) counts: Vec<usize>,
 }
 
 impl Histogram {
