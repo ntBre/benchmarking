@@ -138,23 +138,22 @@ impl Plot {
         let h = mh * 1 / 10;
         self.rect(point!(w, h), point!(mw - w, mh - h));
 
+        let buf = 10;
         let conv = Converter {
             dminx: hist.min,
             dmaxx: hist.max,
             dminy: 0.0,
             dmaxy: *hist.counts.iter().max().unwrap() as f64,
-            cminx: w,
-            cmaxx: mw - w,
-            cminy: h,
+            cminx: w + buf,
+            cmaxx: mw - w - buf,
+            cminy: h + buf,
             cmaxy: mh - h,
         };
 
         let bin_width = (hist.max - hist.min) / hist.counts.len() as f64;
         for (i, bin) in hist.counts.iter().enumerate() {
-            println!("{i} => {bin}");
             let start = i as f64 * bin_width;
             let end = (i + 1) as f64 * bin_width;
-
             let p1 = conv.to_canvas(point!(start, *bin as f64));
             let p2 = conv.to_canvas(point!(end, 0.0));
             self.rect(p1, p2);
