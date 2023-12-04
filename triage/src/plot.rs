@@ -24,10 +24,14 @@ mod color {
     pub(crate) const RED: Rgb8 = rgb(0xff0000);
     pub(crate) const GREEN: Rgb8 = rgb(0x00ff00);
     pub(crate) const BLUE: Rgb8 = rgb(0x0000ff);
+    pub const MAGENTA: Rgb8 = rgb(0xff00ff);
+    pub const CYAN: Rgb8 = rgb(0x00ffff);
+    pub(crate) const BLACK: Rgb8 = rgb(0);
+    pub(crate) const WHITE: Rgb8 = rgb(0xffffff);
 }
 
 mod point {
-    #[derive(Debug)]
+    #[derive(Clone, Copy, Debug)]
     pub(crate) struct Point<T> {
         pub(crate) x: T,
         pub(crate) y: T,
