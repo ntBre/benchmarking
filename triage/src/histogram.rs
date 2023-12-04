@@ -12,10 +12,10 @@ impl Histogram {
         }
         let min = *data.iter().min_by(|a, b| a.total_cmp(b)).unwrap();
         let max = *data.iter().max_by(|a, b| a.total_cmp(b)).unwrap();
-        let fac = (max - min) / bins as f64;
         let mut counts = vec![0; bins];
         for d in data {
-            counts[(d * fac) as usize] += 1;
+            let idx = bins as f64 * (d - min) / (max - min);
+            counts[(idx as usize).clamp(0, bins - 1)] += 1;
         }
         Self { min, max, counts }
     }
