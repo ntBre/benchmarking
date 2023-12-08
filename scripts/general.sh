@@ -1,15 +1,28 @@
 ff=$1
+shift
+ncpus=8
+hours=84
+mem=32
 
-echo generating input for force field $1
+while getopts "c:t:m:h" arg; do
+	case $arg in
+		h) echo 'usage: [-c CPUS] [-t CPU_HOURS] [-m GB_MEMORY] [-h]' ;;
+		c) ncpus=$OPTARG ;;
+		t) hours=$OPTARG ;;
+		m) mem=$OPTARG ;;
+	esac
+done
+
+echo generating input for force field $ff, with $ncpus cpus, $mem gb, and $hours hours
 
 sbatch <<INP
 #!/bin/bash
 #SBATCH -J bench-$1
 #SBATCH -p standard
-#SBATCH -t 84:00:00
+#SBATCH -t $hours:00:00
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=32gb
+#SBATCH --cpus-per-task=$ncpus
+#SBATCH --mem=${mem}gb
 #SBATCH --account dmobley_lab
 #SBATCH --export ALL
 #SBATCH --mail-user=bwestbr1@uci.edu
@@ -26,7 +39,7 @@ python main.py \
        --dataset datasets/industry.json \
        --sqlite-file $1.sqlite \
        --out-dir output/industry/$1 \
-       --procs 8 \
+       --procs $ncpus \
        --invalidate-cache
 
 date
