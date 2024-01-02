@@ -17,7 +17,7 @@ echo generating input for force field $ff, with $ncpus cpus, $mem gb, and $hours
 
 sbatch <<INP
 #!/bin/bash
-#SBATCH -J bench-$1
+#SBATCH -J ib-$ff
 #SBATCH -p standard
 #SBATCH -t $hours:00:00
 #SBATCH --nodes=1
@@ -35,10 +35,10 @@ source ~/.bashrc
 mamba activate ib-dev-esp
 
 python main.py \
-       --forcefield forcefields/$1.offxml \
+       --forcefield forcefields/$ff.offxml \
        --dataset datasets/industry.json \
-       --sqlite-file $1.sqlite \
-       --out-dir output/industry/$1 \
+       --sqlite-file $ff.sqlite \
+       --out-dir output/industry/$ff \
        --procs $ncpus \
        --invalidate-cache
 
