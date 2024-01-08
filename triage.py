@@ -40,7 +40,7 @@ def parse(input):
     with open(input, "r") as inp:
         errors = json.load(inp)
 
-    print(f"{'param':>5} {'count':>8} {'abs mean':>12} {'std':>8}")
+    print(f"{'param':>5} {'count':>8} {'abs_mean':>12} {'std':>8}")
     for k, v in errors.items():
         print(f"{k:>5} {len(v):8} {abs(np.mean(v)):12.8f} {np.std(v):8.4f}")
 

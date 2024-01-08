@@ -7,3 +7,4 @@ __pycache__/
 status
 /triage.json
 /triage/target/
+/*.triage.json
