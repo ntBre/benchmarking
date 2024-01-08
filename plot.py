@@ -10,6 +10,8 @@ def plotter(ffs, names=None):
 
 
 def plot_tm():
+    with open("tm.records.dat") as inp:
+        records = [rec.strip() for rec in inp.readlines()]
     plot(
         "/tmp",
         [
@@ -34,6 +36,8 @@ def plot_tm():
             # "Pavan env bench 2",  # repeated only the benchmark
             "Sage 2.1.0 Force Field and Data Set",
         ],
+        filter_records=records,
+        negate=True,
     )
 
 
