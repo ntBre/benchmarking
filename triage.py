@@ -35,8 +35,9 @@ def cli():
 
 
 @cli.command()
-def parse():
-    with open("triage.json", "r") as inp:
+@click.option("--input", "-i", default="triage.json")
+def parse(input):
+    with open(input, "r") as inp:
         errors = json.load(inp)
 
     print(f"{'param':>5} {'count':>8} {'abs mean':>12} {'std':>8}")
@@ -47,7 +48,8 @@ def parse():
 @cli.command()
 @click.option("--dataset", "-d", default="datasets/industry.json")
 @click.option("--forcefield", "-f", default="sage-2.1.0.offxml")
-def generate(dataset, forcefield):
+@click.option("--output", "-o", default="triage.json")
+def generate(dataset, forcefield, output):
     ds = OptimizationResultCollection.parse_file(dataset)
     data = [v for value in ds.entries.values() for v in value]
 
@@ -76,7 +78,7 @@ def generate(dataset, forcefield):
             for p in labels[key].values():
                 errors[p.id].append(dde[rec_id])
 
-    with open("triage.json", "w") as out:
+    with open(output, "w") as out:
         json.dump(errors, out, indent=2)
 
 
