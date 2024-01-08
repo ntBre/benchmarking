@@ -14,6 +14,8 @@ from openff.qcsubmit.results import OptimizationResultCollection
 from openff.toolkit import ForceField, Molecule
 from tqdm import tqdm
 
+from parse_hist import sort_label
+
 logging.getLogger("openff").setLevel(logging.ERROR)
 
 # each molecule in the data set can be labeled to determine the associated
@@ -41,7 +43,9 @@ def parse(input):
         errors = json.load(inp)
 
     print(f"{'param':>5} {'count':>8} {'abs_mean':>12} {'std':>8}")
-    for k, v in errors.items():
+    keys = sorted(errors.keys(), key=sort_label)
+    for k in keys:
+        v = errors[k]
         print(f"{k:>5} {len(v):8} {abs(np.mean(v)):12.8f} {np.std(v):8.4f}")
 
 

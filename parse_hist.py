@@ -22,7 +22,7 @@ def read_csv(filename):
     return ret
 
 
-LABEL = re.compile(r"([bat])(\d+)([a-z]*)")
+LABEL = re.compile(r"([bati])(\d+)([a-z]*)")
 
 
 def sort_label(key):
