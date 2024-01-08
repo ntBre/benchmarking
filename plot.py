@@ -13,9 +13,9 @@ def plot_tm():
     plot(
         "/tmp",
         [
-            "output/industry/tm",
-            "output/industry/tm-new",
-            # "output/industry/sage-tm",
+            "output/industry/tm-tm",
+            # "output/industry/tm-new",
+            "output/industry/sage-tm",
             # "output/industry/sage-sage",
             # "output/industry/my-sage-2.1.0",
             # "output/industry/pavan-2.1.0",
@@ -24,15 +24,15 @@ def plot_tm():
             "output/industry/sage-2.1.0",
         ],
         names=[
-            "TM-TM",
-            "TM-TM new",
-            # "Sage-TM",
+            "Torsion Multiplicity Force Field and Data Set",
+            # "TM-TM new",
+            "Sage 2.1.0 Force Field with Torsion Multiplicity Data Set",
             # "Sage-Sage",
             # "My Sage 2.1.0",  # my environment (-oe) on sage 2.1 input files
             # "Pavan env",  # pavan's env with sage 2.1.0 input files
             # "Pavan repeat",  # pavan's env with sage 2.1.0 input files again
             # "Pavan env bench 2",  # repeated only the benchmark
-            "Sage",
+            "Sage 2.1.0 Force Field and Data Set",
         ],
     )
 
@@ -77,8 +77,8 @@ def sage_sage():
     plotter(["sage-sage", "sage-sage-new", "my-sage-2.1.0", "sage-2.1.0"])
 
 
-# plot_tm()
-plot_espaloma()
+plot_tm()
+# plot_espaloma()
 # plot_besmarts()
 # plot_msm()
 # sage_sage()
