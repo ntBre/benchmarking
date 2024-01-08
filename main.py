@@ -56,12 +56,13 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
     plot(out_dir)
 
 
-def plot(out_dir, in_dirs=None, names=None, filter_records=None):
-    """
-    Plot each of the `dde`, `rmsd`, and `tfd` CSV files found in
-    `in_dirs` and write the resulting PNG images to out_dir. If
-    provided, take the plot legend entries from `names` instead of
-    `in_dirs`.
+def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
+    """Plot each of the `dde`, `rmsd`, and `tfd` CSV files found in `in_dirs`
+    and write the resulting PNG images to out_dir. If provided, take the plot
+    legend entries from `names` instead of `in_dirs`. If `filter_records` is
+    provided, restrict the plot only to those records. `negate` swaps the
+    comparison to include only the records *not* in `filter_records`.
+
     """
     # assume the input is next to the desired output
     if in_dirs is None:
@@ -88,9 +89,16 @@ def plot(out_dir, in_dirs=None, names=None, filter_records=None):
             dataframe = dataframe.rename(columns={"Unnamed: 0": "Record ID"})
 
             if filter_records is not None:
-                dataframe = dataframe[
-                    dataframe["Record ID"].astype(str).isin(filter_records)
-                ]
+                if negate:
+                    dataframe = dataframe[
+                        ~dataframe["Record ID"]
+                        .astype(str)
+                        .isin(filter_records)
+                    ]
+                else:
+                    dataframe = dataframe[
+                        dataframe["Record ID"].astype(str).isin(filter_records)
+                    ]
 
             if dtype == "dde":
                 sea.kdeplot(
