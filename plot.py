@@ -10,8 +10,8 @@ def plotter(ffs, names=None):
 
 
 def plot_tm():
-    with open("tm.records.dat") as inp:
-        records = [rec.strip() for rec in inp.readlines()]
+    # with open("tm.records.dat") as inp:
+    #     records = [rec.strip() for rec in inp.readlines()]
     plot(
         "/tmp",
         [
@@ -36,8 +36,8 @@ def plot_tm():
             # "Pavan env bench 2",  # repeated only the benchmark
             "Sage 2.1.0 Force Field and Data Set",
         ],
-        filter_records=records,
-        negate=True,
+        # filter_records=records,
+        # negate=True,
     )
 
 
@@ -89,6 +89,8 @@ plot_tm()
 # plot_repro()
 
 # plotter(["my-sage-2.1.0", "pavan-2.1.0", "pavan-repeat", "sage-2.1.0"])
+
+# plotter(["espaloma-all", "sage-2.1.0"])
 
 subprocess.run(
     [
