@@ -81,7 +81,8 @@ def sage_sage():
     plotter(["sage-sage", "sage-sage-new", "my-sage-2.1.0", "sage-2.1.0"])
 
 
-plot_tm()
+plotter(["sage-2.1.0", "espaloma-all-refit"])
+# plot_tm()
 # plot_espaloma()
 # plot_besmarts()
 # plot_msm()
