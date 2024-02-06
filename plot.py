@@ -16,6 +16,7 @@ def plot_tm():
         "/tmp",
         [
             "output/industry/tm-tm",
+            "output/industry/v2-tm",
             # "output/industry/tm-new",
             "output/industry/sage-tm",
             # "output/industry/sage-sage",
@@ -27,6 +28,7 @@ def plot_tm():
         ],
         names=[
             "Torsion Multiplicity Force Field and Data Set",
+            "v2 with Full Splits",
             # "TM-TM new",
             "Sage 2.1.0 Force Field with Torsion Multiplicity Data Set",
             # "Sage-Sage",
@@ -81,7 +83,7 @@ def sage_sage():
     plotter(["sage-sage", "sage-sage-new", "my-sage-2.1.0", "sage-2.1.0"])
 
 
-plotter(["sage-2.1.0", "espaloma-all-refit"])
+# plotter(["sage-2.1.0", "espaloma-all-refit"])
 # plot_tm()
 # plot_espaloma()
 # plot_besmarts()
@@ -92,6 +94,8 @@ plotter(["sage-2.1.0", "espaloma-all-refit"])
 # plotter(["my-sage-2.1.0", "pavan-2.1.0", "pavan-repeat", "sage-2.1.0"])
 
 # plotter(["espaloma-all", "sage-2.1.0"])
+
+plotter(["sage-2.1.0", "2.2-split-v1", "2.2-v2"])
 
 subprocess.run(
     [
