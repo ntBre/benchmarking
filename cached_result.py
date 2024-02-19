@@ -3,10 +3,20 @@ from dataclasses import dataclass
 
 import numpy
 from ibstore import MoleculeStore
+from ibstore._db import DBMoleculeRecord
 from ibstore.models import MoleculeRecord, QMConformerRecord
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.units import unit
 from tqdm import tqdm
+
+
+def get_molecule_id_by_smiles(db, smiles: str) -> int:
+    return [
+        id
+        for (id,) in db.db.query(DBMoleculeRecord.id)
+        .filter_by(mapped_smiles=smiles)
+        .all()
+    ][0]
 
 
 @dataclass
@@ -114,8 +124,8 @@ class CachedResultCollection:
                     continue
                 db.store_qm_conformer_record(
                     QMConformerRecord(
-                        molecule_id=store.get_molecule_id_by_smiles(
-                            record.mapped_smiles
+                        molecule_id=get_molecule_id_by_smiles(
+                            db, record.mapped_smiles
                         ),
                         qcarchive_id=record.qc_record_id,
                         mapped_smiles=record.mapped_smiles,
