@@ -37,3 +37,6 @@ debug:
 	rm -r debug
 	mkdir debug
 	python debug.py $(ARGS)
+
+datasets/cache/industry.json: datasets/industry.json
+	python cache_dataset.py --dataset $< --output $@
