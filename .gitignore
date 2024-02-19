@@ -8,3 +8,4 @@ status
 /triage.json
 /triage/target/
 /*.triage.json
+*.bz2
