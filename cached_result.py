@@ -95,31 +95,33 @@ class CachedResultCollection:
     def into_store(self, database_name) -> MoleculeStore:
         """modeled on MoleculeStore.from_qcsubmit_collection"""
         store = MoleculeStore(database_name)
+
+        # adapted from MoleculeRecord.from_molecule and MoleculeStore.store
         with store._get_session() as db:
-            for record in tqdm(self.inner, desc="Converting to MoleculeStore"):
-                # adapted from MoleculeRecord.from_molecule
-                molecule_record = MoleculeRecord(
-                    mapped_smiles=record.mapped_smiles,
-                    inchi_key=record.inchi_key,
-                )
-                # from MoleculeStore.store
-                db.store_molecule_record(molecule_record)
-
-                # adapted from QMConformerRecord.from_qcarchive_record
-                molecule_id = store.get_molecule_id_by_smiles(
-                    molecule_record.mapped_smiles
+            for record in tqdm(self.inner, desc="Storing molecules"):
+                db.store_molecule_record(
+                    MoleculeRecord(
+                        mapped_smiles=record.mapped_smiles,
+                        inchi_key=record.inchi_key,
+                    )
                 )
 
+        # adapted from QMConformerRecord.from_qcarchive_record and
+        # MoleculeStore.store_qcarchive
+        with store._get_session() as db:
+            for record in tqdm(self.inner, desc="Storing Records"):
                 if db._qm_conformer_already_exists(record.qc_record_id):
                     continue
-
                 db.store_qm_conformer_record(
                     QMConformerRecord(
-                        molecule_id=molecule_id,
+                        molecule_id=store.get_molecule_id_by_smiles(
+                            record.mapped_smiles
+                        ),
                         qcarchive_id=record.qc_record_id,
-                        mapped_smiles=molecule_record.mapped_smiles,
+                        mapped_smiles=record.mapped_smiles,
                         coordinates=record.coordinates,
                         energy=record.qc_record_final_energy,
                     )
                 )
+
         return store
