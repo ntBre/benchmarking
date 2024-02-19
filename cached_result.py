@@ -123,7 +123,8 @@ class CachedResultCollection:
         # (DBSessionManager._qm_conformer_already_exists), which appears to
         # query the entire database every single time. This should work as long
         # as the store is initially empty here and it only gets updated at the
-        # same time as seen
+        # same time as seen. to be more rigorous, we could probably initialize
+        # the set from a db query and then update it like a normal set after
         seen = set()
         with store._get_session() as db:
             for record in tqdm(self.inner, desc="Storing Records"):
