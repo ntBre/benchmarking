@@ -10,13 +10,11 @@ from openff.units import unit
 from tqdm import tqdm
 
 
-def get_molecule_id_by_smiles(db, smiles: str) -> int:
-    return [
-        id
-        for (id,) in db.db.query(DBMoleculeRecord.id)
-        .filter_by(mapped_smiles=smiles)
-        .all()
-    ][0]
+def get_molecule_id_by_smiles(db):
+    return {
+        rec.mapped_smiles: rec.id
+        for rec in db.db.query(DBMoleculeRecord).all()
+    }
 
 
 @dataclass
@@ -126,6 +124,7 @@ class CachedResultCollection:
         # same time as seen. to be more rigorous, we could probably initialize
         # the set from a db query and then update it like a normal set after
         seen = set()
+        smiles_to_id = get_molecule_id_by_smiles(db)
         with store._get_session() as db:
             for record in tqdm(self.inner, desc="Storing Records"):
                 if record.qc_record_id in seen:
@@ -133,9 +132,7 @@ class CachedResultCollection:
                 seen.add(record.qc_record_id)
                 db.store_qm_conformer_record(
                     QMConformerRecord(
-                        molecule_id=get_molecule_id_by_smiles(
-                            db, record.mapped_smiles
-                        ),
+                        molecule_id=smiles_to_id[record.mapped_smiles],
                         qcarchive_id=record.qc_record_id,
                         mapped_smiles=record.mapped_smiles,
                         coordinates=record.coordinates,
