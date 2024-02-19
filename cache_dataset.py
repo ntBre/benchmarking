@@ -1,7 +1,7 @@
 import click
 from openff.qcsubmit.results import OptimizationResultCollection
 
-from cache_dataset import CachedResultCollection
+from cached_result import CachedResultCollection
 
 
 @click.command()
