@@ -6,6 +6,7 @@ from ibstore import MoleculeStore
 from ibstore.models import MoleculeRecord, QMConformerRecord
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.units import unit
+from tqdm import tqdm
 
 
 @dataclass
@@ -94,7 +95,7 @@ class CachedResultCollection:
     def into_store(self, database_name) -> MoleculeStore:
         """modeled on MoleculeStore.from_qcsubmit_collection"""
         store = MoleculeStore(database_name)
-        for record in self.inner:
+        for record in tqdm(self.inner, desc="Converting to MoleculeStore"):
             # adapted from MoleculeRecord.from_molecule
             molecule_record = MoleculeRecord(
                 mapped_smiles=record.mapped_smiles, inchi_key=record.inchi_key
