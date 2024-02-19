@@ -9,7 +9,8 @@ import pandas
 import seaborn as sea
 from ibstore import MoleculeStore
 from matplotlib import pyplot
-from openff.qcsubmit.results import OptimizationResultCollection
+
+from cached_result import CachedResultCollection
 
 # try to suppress stereo warnings - from lily's valence-fitting
 # curate-dataset.py
@@ -23,7 +24,7 @@ warnings.filterwarnings(
 
 @click.command()
 @click.option("--forcefield", "-f", default="force-field.offxml")
-@click.option("--dataset", "-d", default="datasets/industry.json")
+@click.option("--dataset", "-d", default="datasets/cache/industry.json")
 @click.option("--sqlite-file", "-s", default="tmp.sqlite")
 @click.option("--out-dir", "-o", default=".")
 @click.option("--procs", "-p", default=16)
@@ -35,11 +36,10 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
         print(f"loading existing database from {sqlite_file}")
         store = MoleculeStore(sqlite_file)
     else:
-        print(f"loading initial dataset from {dataset}")
-        opt = OptimizationResultCollection.parse_file(dataset)
-
-        print(f"generating database, saving to {sqlite_file}")
-        store = MoleculeStore.from_qcsubmit_collection(opt, sqlite_file)
+        print(f"loading cached dataset from {dataset}")
+        store = CachedResultCollection.from_json(dataset).into_store(
+            sqlite_file
+        )
 
     print("started optimizing store")
     start = time.time()
