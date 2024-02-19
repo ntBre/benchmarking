@@ -1,4 +1,4 @@
-from main import CachedResultCollection
+from cached_result import CachedResultCollection
 from openff.qcsubmit.results import OptimizationResultCollection
 
 
