@@ -105,14 +105,18 @@ class CachedResultCollection:
         store = MoleculeStore(database_name)
 
         # adapted from MoleculeRecord.from_molecule and MoleculeStore.store
+        inchis = set()
         with store._get_session() as db:
             for record in tqdm(self.inner, desc="Storing molecules"):
+                inchis.add(record.inchi_key)
                 db.store_molecule_record(
                     MoleculeRecord(
                         mapped_smiles=record.mapped_smiles,
                         inchi_key=record.inchi_key,
                     )
                 )
+
+        print(f"saw {len(inchis)} unique inchis")
 
         # adapted from QMConformerRecord.from_qcarchive_record and
         # MoleculeStore.store_qcarchive
@@ -124,15 +128,36 @@ class CachedResultCollection:
         # same time as seen. to be more rigorous, we could probably initialize
         # the set from a db query and then update it like a normal set after
         seen = set()
-        smiles_to_id = get_molecule_id_by_smiles(db)
+        # print(len(smiles_to_id))
+        # for k, v in smiles_to_id.items():
+        #     print(f"{k} => {v}")
+
+        # something bad happened because only 451 (402 locally) optimizations
+        # are running. I suspect something with this dict
+        #
+        # dict actually looks fine, maybe it's seen?
+        #
+        # it's also not seen, that never gets entered as expected
+
+        # for some reason, conformers don't seem to be getting added. I'm
+        # printing the number of conformers by inchi in optimize_mm and it
+        # lines up with the 451 showing up in tqdm. a simple grep shows
+        # multiple conformers for one inchi I checked at random but python
+        # shows only 1
         with store._get_session() as db:
+            smiles_to_id = get_molecule_id_by_smiles(db)
+            # only found 9662, but I think that's okay. store_molecule_record
+            # just returns if the smiles already exists, so the entries should
+            # be unique
+            print(f"found {len(smiles_to_id)} smiles")
             for record in tqdm(self.inner, desc="Storing Records"):
                 if record.qc_record_id in seen:
                     continue
+                rec_id = smiles_to_id[record.mapped_smiles]
                 seen.add(record.qc_record_id)
                 db.store_qm_conformer_record(
                     QMConformerRecord(
-                        molecule_id=smiles_to_id[record.mapped_smiles],
+                        molecule_id=rec_id,
                         qcarchive_id=record.qc_record_id,
                         mapped_smiles=record.mapped_smiles,
                         coordinates=record.coordinates,
