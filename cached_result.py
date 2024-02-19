@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass
 
 import numpy
+from ibstore import MoleculeRecord, MoleculeStore, QMConformerRecord
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.units import unit
 
@@ -89,3 +90,27 @@ class CachedResultCollection:
                 )
             )
         return ret
+
+    def into_store(self, database_name) -> MoleculeStore:
+        """modeled on MoleculeStore.from_qcsubmit_collection"""
+        store = MoleculeStore(database_name)
+        for record in self.inner:
+            # adapted from MoleculeRecord.from_molecule
+            molecule_record = MoleculeRecord(
+                mapped_smiles=record.mapped_smiles, inchi_key=record.inchi_key
+            )
+            store.store(molecule_record)
+            # adapted from QMConformerRecord.from_qcarchive_record
+            molecule_id = store.get_molecule_id_by_smiles(
+                molecule_record.mapped_smiles
+            )
+            store.store_qcarchive(
+                QMConformerRecord(
+                    molecule_id=molecule_id,
+                    qcarchive_id=record.qc_record_id,
+                    mapped_smiles=molecule_record.mapped_smiles,
+                    coordinates=record.coordinates,
+                    energy=record.qc_record_final_energy,
+                )
+            )
+        return store
