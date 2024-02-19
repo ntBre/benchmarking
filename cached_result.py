@@ -86,8 +86,7 @@ class CachedResultCollection:
                     coordinates=numpy.array(entry["coordinates"])
                     * unit.angstrom,
                     qc_record_id=entry["qc_record_id"],
-                    qc_record_final_energy=entry["qc_record_final_energy"]
-                    * unit.kilocalorie_per_mole,
+                    qc_record_final_energy=entry["qc_record_final_energy"],
                 )
             )
         return ret
