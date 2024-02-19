@@ -33,15 +33,15 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
     if invalidate_cache and os.path.exists(sqlite_file):
         os.remove(sqlite_file)
     if os.path.exists(sqlite_file):
-        print(f"loading existing database from {sqlite_file}")
+        print(f"loading existing database from {sqlite_file}", flush=True)
         store = MoleculeStore(sqlite_file)
     else:
-        print(f"loading cached dataset from {dataset}")
+        print(f"loading cached dataset from {dataset}", flush=True)
         store = CachedResultCollection.from_json(dataset).into_store(
             sqlite_file
         )
 
-    print("started optimizing store")
+    print("started optimizing store", flush=True)
     start = time.time()
     store.optimize_mm(force_field=forcefield, n_processes=procs)
     print(f"finished optimizing after {time.time() - start} sec")
