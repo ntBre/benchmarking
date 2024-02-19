@@ -2,7 +2,8 @@ import json
 from dataclasses import dataclass
 
 import numpy
-from ibstore import MoleculeRecord, MoleculeStore, QMConformerRecord
+from ibstore import MoleculeStore
+from ibstore.models import MoleculeRecord, QMConformerRecord
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.units import unit
 
