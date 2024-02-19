@@ -124,7 +124,7 @@ class CachedResultCollection:
         # query the entire database every single time. This should work as long
         # as the store is initially empty here and it only gets updated at the
         # same time as seen
-        seen = {}
+        seen = set()
         with store._get_session() as db:
             for record in tqdm(self.inner, desc="Storing Records"):
                 if record.qc_record_id in seen:
