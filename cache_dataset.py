@@ -1,7 +1,11 @@
+import logging
+
 import click
 from openff.qcsubmit.results import OptimizationResultCollection
 
 from cached_result import CachedResultCollection
+
+logging.getLogger("openff").setLevel(logging.ERROR)
 
 
 @click.command()
