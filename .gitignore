@@ -9,3 +9,4 @@ status
 /triage/target/
 /*.triage.json
 *.bz2
+/datasets/cache/industry.json
