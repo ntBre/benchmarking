@@ -10,11 +10,13 @@ from openff.units import unit
 from tqdm import tqdm
 
 
-def get_molecule_id_by_smiles(db):
-    return {
-        rec.mapped_smiles: rec.id
-        for rec in db.db.query(DBMoleculeRecord).all()
-    }
+def get_molecule_id_by_smiles(db, smiles: str) -> int:
+    return [
+        id
+        for (id,) in db.db.query(DBMoleculeRecord.id)
+        .filter_by(mapped_smiles=smiles)
+        .all()
+    ][0]
 
 
 @dataclass
@@ -145,19 +147,15 @@ class CachedResultCollection:
         # multiple conformers for one inchi I checked at random but python
         # shows only 1
         with store._get_session() as db:
-            smiles_to_id = get_molecule_id_by_smiles(db)
-            # only found 9662, but I think that's okay. store_molecule_record
-            # just returns if the smiles already exists, so the entries should
-            # be unique
-            print(f"found {len(smiles_to_id)} smiles")
             for record in tqdm(self.inner, desc="Storing Records"):
                 if record.qc_record_id in seen:
                     continue
-                rec_id = smiles_to_id[record.mapped_smiles]
                 seen.add(record.qc_record_id)
                 db.store_qm_conformer_record(
                     QMConformerRecord(
-                        molecule_id=rec_id,
+                        molecule_id=get_molecule_id_by_smiles(
+                            db, record.mapped_smiles
+                        ),
                         qcarchive_id=record.qc_record_id,
                         mapped_smiles=record.mapped_smiles,
                         coordinates=record.coordinates,
