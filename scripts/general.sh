@@ -2,7 +2,7 @@ ff=$1
 shift
 ncpus=8
 hours=84
-mem=32
+mem=64
 
 while getopts "c:t:m:h" arg; do
 	case $arg in
@@ -36,7 +36,7 @@ mamba activate ib-dev-esp
 
 python main.py \
        --forcefield forcefields/$ff.offxml \
-       --dataset datasets/industry.json \
+       --dataset datasets/cache/industry.json \
        --sqlite-file $ff.sqlite \
        --out-dir output/industry/$ff \
        --procs $ncpus \
