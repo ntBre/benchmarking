@@ -9,14 +9,19 @@ from openff.qcsubmit.results import OptimizationResultCollection
 from openff.units import unit
 from tqdm import tqdm
 
+SMI_CACHE = None
+
 
 def get_molecule_id_by_smiles(db, smiles: str) -> int:
-    return [
-        id
-        for (id,) in db.db.query(DBMoleculeRecord.id)
-        .filter_by(mapped_smiles=smiles)
-        .all()
-    ][0]
+    global SMI_CACHE
+    if SMI_CACHE is None:
+        SMI_CACHE = [
+            (id, smi)
+            for (id, smi) in db.db.query(
+                DBMoleculeRecord.id, DBMoleculeRecord.mapped_smiles
+            ).all()
+        ]
+    return [(id, smi) for id, smi in SMI_CACHE if smi == smiles][0]
 
 
 @dataclass
@@ -151,11 +156,14 @@ class CachedResultCollection:
                 if record.qc_record_id in seen:
                     continue
                 seen.add(record.qc_record_id)
+                # just checking that I know how the query works
+                mol_id, smi = get_molecule_id_by_smiles(
+                    db, record.mapped_smiles
+                )
+                assert smi == record.mapped_smiles
                 db.store_qm_conformer_record(
                     QMConformerRecord(
-                        molecule_id=get_molecule_id_by_smiles(
-                            db, record.mapped_smiles
-                        ),
+                        molecule_id=mol_id,
                         qcarchive_id=record.qc_record_id,
                         mapped_smiles=record.mapped_smiles,
                         coordinates=record.coordinates,
