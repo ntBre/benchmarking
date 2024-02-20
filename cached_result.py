@@ -16,12 +16,12 @@ def get_molecule_id_by_smiles(db, smiles: str) -> int:
     global SMI_CACHE
     if SMI_CACHE is None:
         SMI_CACHE = [
-            (id, smi)
+            (smi, id)
             for (id, smi) in db.db.query(
                 DBMoleculeRecord.id, DBMoleculeRecord.mapped_smiles
             ).all()
         ]
-    return [(id, smi) for id, smi in SMI_CACHE if smi == smiles][0]
+    return [(smi, id) for smi, id in SMI_CACHE if smi == smiles][0]
 
 
 @dataclass
@@ -157,7 +157,7 @@ class CachedResultCollection:
                     continue
                 seen.add(record.qc_record_id)
                 # just checking that I know how the query works
-                mol_id, smi = get_molecule_id_by_smiles(
+                smi, mol_id = get_molecule_id_by_smiles(
                     db, record.mapped_smiles
                 )
                 assert smi == record.mapped_smiles
