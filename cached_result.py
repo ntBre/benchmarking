@@ -9,21 +9,21 @@ from openff.qcsubmit.results import OptimizationResultCollection
 from openff.units import unit
 from tqdm import tqdm
 
-_SMI_CACHE = None
 
-
-def get_molecule_id_by_smiles(db, smiles: str) -> int:
-    global _SMI_CACHE
-    if _SMI_CACHE is None:
-        _SMI_CACHE = {
-            smi: id
-            for id, smi in reversed(
-                db.db.query(
-                    DBMoleculeRecord.id, DBMoleculeRecord.mapped_smiles
-                ).all()
-            )
-        }
-    return _SMI_CACHE[smiles]
+def get_molecule_id_by_smiles(db) -> dict[str, int]:
+    "Return a map of MoleculeRecord mapped SMILES to MoleculeRecord ids"
+    # for some reason this has to be reversed, meaning the first record
+    # encountered has to win out. this matches the behavior of the original
+    # version, where the query was run each time and the first result was
+    # returned
+    return {
+        smi: id
+        for id, smi in reversed(
+            db.db.query(
+                DBMoleculeRecord.id, DBMoleculeRecord.mapped_smiles
+            ).all()
+        )
+    }
 
 
 @dataclass
@@ -135,31 +135,17 @@ class CachedResultCollection:
         # query the entire database every single time. This should work as long
         # as the store is initially empty here and it only gets updated at the
         # same time as seen. to be more rigorous, we could probably initialize
-        # the set from a db query and then update it like a normal set after
+        # the set from a db query and then update it like a normal set after.
+        # in practice, this is never actually used here because all of the
+        # record_ids are unique
         seen = set()
-        # print(len(smiles_to_id))
-        # for k, v in smiles_to_id.items():
-        #     print(f"{k} => {v}")
-
-        # something bad happened because only 451 (402 locally) optimizations
-        # are running. I suspect something with this dict
-        #
-        # dict actually looks fine, maybe it's seen?
-        #
-        # it's also not seen, that never gets entered as expected
-
-        # for some reason, conformers don't seem to be getting added. I'm
-        # printing the number of conformers by inchi in optimize_mm and it
-        # lines up with the 451 showing up in tqdm. a simple grep shows
-        # multiple conformers for one inchi I checked at random but python
-        # shows only 1
+        smiles_to_id = get_molecule_id_by_smiles(db)
         with store._get_session() as db:
             for record in tqdm(self.inner, desc="Storing Records"):
                 if record.qc_record_id in seen:
                     continue
                 seen.add(record.qc_record_id)
-                # just checking that I know how the query works
-                mol_id = get_molecule_id_by_smiles(db, record.mapped_smiles)
+                mol_id = smiles_to_id[record.mapped_smiles]
                 db.store_qm_conformer_record(
                     QMConformerRecord(
                         molecule_id=mol_id,
