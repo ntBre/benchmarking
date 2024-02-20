@@ -15,13 +15,13 @@ SMI_CACHE = None
 def get_molecule_id_by_smiles(db, smiles: str) -> int:
     global SMI_CACHE
     if SMI_CACHE is None:
-        SMI_CACHE = [
-            (smi, id)
-            for (id, smi) in db.db.query(
-                DBMoleculeRecord.id, DBMoleculeRecord.mapped_smiles
-            ).all()
-        ]
-    return [id for smi, id in SMI_CACHE if smi == smiles][0]
+        SMI_CACHE = dict()
+        for id, smi in db.db.query(
+            DBMoleculeRecord.id, DBMoleculeRecord.mapped_smiles
+        ).all():
+            if smi not in SMI_CACHE:
+                SMI_CACHE[smi] = id
+    return SMI_CACHE[smiles]
 
 
 @dataclass
