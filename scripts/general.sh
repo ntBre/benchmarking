@@ -1,21 +1,28 @@
+set -e
+
 ff=$1
 shift
 ncpus=8
 hours=84
 mem=64
+env=ib-dev-esp
 
-while getopts "c:t:m:h" arg; do
+cmd=sbatch
+
+while getopts "c:t:m:h:de:" arg; do
 	case $arg in
 		h) echo 'usage: [-c CPUS] [-t CPU_HOURS] [-m GB_MEMORY] [-h]' ;;
 		c) ncpus=$OPTARG ;;
 		t) hours=$OPTARG ;;
 		m) mem=$OPTARG ;;
+		d) cmd=cat ;; # dry run
+		e) env=$OPTARG ;; # conda env
 	esac
 done
 
 echo generating input for force field $ff, with $ncpus cpus, $mem gb, and $hours hours
 
-sbatch <<INP
+$cmd <<INP
 #!/bin/bash
 #SBATCH -J ib-$ff
 #SBATCH -p standard
@@ -32,7 +39,7 @@ date
 hostname
 
 source ~/.bashrc
-mamba activate ib-dev-esp
+mamba activate $env
 
 python -u main.py \
        --forcefield forcefields/$ff.offxml \
