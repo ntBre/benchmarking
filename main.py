@@ -79,6 +79,9 @@ def optimize_mm(
         chunksize=chunksize,
     )
 
+    start = time.time()
+    print("started storing records")
+
     with store._get_session() as db:
         # from _mm_conformer_already_exists
         seen = set(
@@ -105,6 +108,8 @@ def optimize_mm(
                 continue
             seen.add(record.qcarchive_id)
             db.store_mm_conformer_record(record)
+
+    print(f"finished storing records after {time.time() - start} sec")
 
 
 @click.command()
