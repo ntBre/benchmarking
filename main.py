@@ -9,7 +9,11 @@ import numpy
 import pandas
 import seaborn as sea
 from ibstore import MoleculeStore
-from ibstore._db import DBQMConformerRecord, MMConformerRecord
+from ibstore._db import (
+    DBMMConformerRecord,
+    DBQMConformerRecord,
+    MMConformerRecord,
+)
 from matplotlib import pyplot
 
 from cached_result import CachedResultCollection
@@ -76,6 +80,12 @@ def optimize_mm(
     )
 
     with store._get_session() as db:
+        # from _mm_conformer_already_exists
+        seen = set(
+            db.db.query(
+                DBMMConformerRecord.qcarchive_id,
+            )
+        )
         for result in _minimized_blob:
             inchi_key = result.inchi_key
             molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
@@ -90,13 +100,11 @@ def optimize_mm(
                 ),
             )
             # inlined from MoleculeStore.store_conformer
-            if db._mm_conformer_already_exists(
-                record.qcarchive_id,
-                record.qcarchive_id,
-            ):
+            if record.qcarchive_id in seen:
+                print("already seen this record")
                 continue
-            else:
-                db.store_mm_conformer_record(record)
+            seen.add(record.qcarchive_id)
+            db.store_mm_conformer_record(record)
 
 
 @click.command()
