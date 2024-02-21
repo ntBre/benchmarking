@@ -13,8 +13,8 @@ python main.py	-f forcefields/sage-2.1.0.offxml \
 
 # check the maximum deviation across runs, normal values seem to be around 0,
 # 0.5, and 1.3, respectively
-Rscript csvdiff.R dde.csv true/dde.csv
-Rscript csvdiff.R tfd.csv true/tfd.csv
-Rscript csvdiff.R rmsd.csv true/rmsd.csv
+./csvdiff.R dde.csv true/dde.csv
+./csvdiff.R tfd.csv true/tfd.csv
+./csvdiff.R rmsd.csv true/rmsd.csv
 
 rm dde.csv dde.png rmsd.csv rmsd.png step_dde.png tfd.csv tfd.png

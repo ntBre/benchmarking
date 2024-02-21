@@ -1,3 +1,5 @@
+#!/usr/bin/Rscript
+
 debug <- Sys.getenv("RDEBUG") == 1
 
 args <- commandArgs(trailingOnly = TRUE)
