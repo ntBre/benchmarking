@@ -115,9 +115,12 @@ class CachedResultCollection:
         # adapted from MoleculeRecord.from_molecule, MoleculeStore.store, and
         # DBSessionManager.store_molecule_record
         with store._get_session() as db:
+            # instead of DBSessionManager._smiles_already_exists
+            seen = set(db.db.query(DBMoleculeRecord.mapped_smiles))
             for rec in tqdm(self.inner, desc="Storing molecules"):
-                if db._smiles_already_exists(smiles=rec.mapped_smiles):
+                if rec.mapped_smiles in seen:
                     continue
+                seen.add(rec.mapped_smiles)
                 db_record = DBMoleculeRecord(
                     mapped_smiles=rec.mapped_smiles, inchi_key=rec.inchi_key
                 )
