@@ -3,8 +3,7 @@ from dataclasses import dataclass
 
 import numpy
 from ibstore import MoleculeStore
-from ibstore._db import DBMoleculeRecord
-from ibstore.models import MoleculeRecord, QMConformerRecord
+from ibstore._db import DBMoleculeRecord, DBQMConformerRecord
 from openff.qcsubmit.results import OptimizationResultCollection
 from openff.units import unit
 from tqdm import tqdm
@@ -113,17 +112,21 @@ class CachedResultCollection:
         """modeled on MoleculeStore.from_qcsubmit_collection"""
         store = MoleculeStore(database_name)
 
-        # adapted from MoleculeRecord.from_molecule and MoleculeStore.store
-        for record in tqdm(self.inner, desc="Storing molecules"):
-            store.store(
-                MoleculeRecord(
-                    mapped_smiles=record.mapped_smiles,
-                    inchi_key=record.inchi_key,
+        # adapted from MoleculeRecord.from_molecule, MoleculeStore.store, and
+        # DBSessionManager.store_molecule_record
+        with store._get_session() as db:
+            for rec in tqdm(self.inner, desc="Storing molecules"):
+                if db._smiles_already_exists(smiles=rec.mapped_smiles):
+                    continue
+                db_record = DBMoleculeRecord(
+                    mapped_smiles=rec.mapped_smiles, inchi_key=rec.inchi_key
                 )
-            )
+                db.db.add(db_record)
+                db.db.commit()
 
-        # adapted from QMConformerRecord.from_qcarchive_record and
-        # MoleculeStore.store_qcarchive
+        # adapted from MoleculeStore.store_qcarchive,
+        # QMConformerRecord.from_qcarchive_record, and
+        # DBSessionManager.store_qm_conformer_record
 
         # using a simple set instead of db query each time
         # (DBSessionManager._qm_conformer_already_exists), which appears to
@@ -141,14 +144,15 @@ class CachedResultCollection:
                     continue
                 seen.add(record.qc_record_id)
                 mol_id = smiles_to_id[record.mapped_smiles]
-                db.store_qm_conformer_record(
-                    QMConformerRecord(
-                        molecule_id=mol_id,
+                db.db.add(
+                    DBQMConformerRecord(
+                        parent_id=mol_id,
                         qcarchive_id=record.qc_record_id,
                         mapped_smiles=record.mapped_smiles,
                         coordinates=record.coordinates,
                         energy=record.qc_record_final_energy,
-                    )
+                    ),
                 )
+                db.db.commit()
 
         return store
