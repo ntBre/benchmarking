@@ -16,3 +16,5 @@ python main.py	-f forcefields/sage-2.1.0.offxml \
 Rscript csvdiff.R dde.csv true/dde.csv
 Rscript csvdiff.R tfd.csv true/tfd.csv
 Rscript csvdiff.R rmsd.csv true/rmsd.csv
+
+rm dde.csv dde.png rmsd.csv rmsd.png step_dde.png tfd.csv tfd.png
