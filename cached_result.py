@@ -127,17 +127,12 @@ class CachedResultCollection:
         # adapted from MoleculeStore.store_qcarchive,
         # QMConformerRecord.from_qcarchive_record, and
         # DBSessionManager.store_qm_conformer_record
-
-        # using a simple set instead of db query each time
-        # (DBSessionManager._qm_conformer_already_exists), which appears to
-        # query the entire database every single time. This should work as long
-        # as the store is initially empty here and it only gets updated at the
-        # same time as seen. to be more rigorous, we could probably initialize
-        # the set from a db query and then update it like a normal set after.
-        # in practice, this is never actually used here because all of the
-        # record_ids are unique
-        seen = set()
         with store._get_session() as db:
+            seen = set(
+                db.db.query(
+                    DBQMConformerRecord.qcarchive_id,
+                )
+            )
             smiles_to_id = get_molecule_id_by_smiles(db)
             for record in tqdm(self.inner, desc="Storing Records"):
                 if record.qc_record_id in seen:
