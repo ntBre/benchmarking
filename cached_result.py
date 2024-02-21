@@ -153,6 +153,5 @@ class CachedResultCollection:
                         energy=record.qc_record_final_energy,
                     ),
                 )
-                db.db.commit()
 
         return store
