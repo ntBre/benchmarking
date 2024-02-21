@@ -114,18 +114,13 @@ class CachedResultCollection:
         store = MoleculeStore(database_name)
 
         # adapted from MoleculeRecord.from_molecule and MoleculeStore.store
-        inchis = set()
-        with store._get_session() as db:
-            for record in tqdm(self.inner, desc="Storing molecules"):
-                inchis.add(record.inchi_key)
-                db.store_molecule_record(
-                    MoleculeRecord(
-                        mapped_smiles=record.mapped_smiles,
-                        inchi_key=record.inchi_key,
-                    )
+        for record in tqdm(self.inner, desc="Storing molecules"):
+            store.store(
+                MoleculeRecord(
+                    mapped_smiles=record.mapped_smiles,
+                    inchi_key=record.inchi_key,
                 )
-
-        print(f"saw {len(inchis)} unique inchis")
+            )
 
         # adapted from QMConformerRecord.from_qcarchive_record and
         # MoleculeStore.store_qcarchive
@@ -139,8 +134,8 @@ class CachedResultCollection:
         # in practice, this is never actually used here because all of the
         # record_ids are unique
         seen = set()
-        smiles_to_id = get_molecule_id_by_smiles(db)
         with store._get_session() as db:
+            smiles_to_id = get_molecule_id_by_smiles(db)
             for record in tqdm(self.inner, desc="Storing Records"):
                 if record.qc_record_id in seen:
                     continue
