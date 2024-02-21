@@ -92,19 +92,17 @@ def optimize_mm(
         for result in _minimized_blob:
             inchi_key = result.inchi_key
             molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
-            record = (
-                MMConformerRecord(
-                    molecule_id=molecule_id,
-                    qcarchive_id=result.qcarchive_id,
-                    force_field=result.force_field,
-                    mapped_smiles=result.mapped_smiles,
-                    energy=result.energy,
-                    coordinates=result.coordinates,
-                ),
+            record = MMConformerRecord(
+                molecule_id=molecule_id,
+                qcarchive_id=result.qcarchive_id,
+                force_field=result.force_field,
+                mapped_smiles=result.mapped_smiles,
+                energy=result.energy,
+                coordinates=result.coordinates,
             )
             # inlined from MoleculeStore.store_conformer
             if record.qcarchive_id in seen:
-                print("already seen this record")
+                print("already seen this record, skipping")
                 continue
             seen.add(record.qcarchive_id)
             db.store_mm_conformer_record(record)
@@ -133,7 +131,7 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
 
     print("started optimizing store", flush=True)
     start = time.time()
-    store.optimize_mm(force_field=forcefield, n_processes=procs)
+    optimize_mm(store, force_field=forcefield, n_processes=procs)
     print(f"finished optimizing after {time.time() - start} sec")
 
     if not os.path.exists(out_dir):
