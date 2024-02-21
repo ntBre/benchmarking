@@ -2,12 +2,14 @@ import logging
 import os
 import time
 import warnings
+from collections import defaultdict
 
 import click
 import numpy
 import pandas
 import seaborn as sea
 from ibstore import MoleculeStore
+from ibstore._db import DBQMConformerRecord, MMConformerRecord
 from matplotlib import pyplot
 
 from cached_result import CachedResultCollection
@@ -20,6 +22,81 @@ logging.getLogger("openff").setLevel(logging.ERROR)
 warnings.filterwarnings(
     "ignore", message="divide by zero", category=RuntimeWarning
 )
+
+
+# copy of MoleculeStore.optimize_mm with db session optimizations
+def optimize_mm(
+    store,
+    force_field: str,
+    prune_isomorphs: bool = False,
+    n_processes: int = 2,
+    chunksize=32,
+):
+    from ibstore._minimize import _minimize_blob
+
+    inchi_keys = store.get_inchi_keys()
+
+    _data = defaultdict(list)
+
+    for inchi_key in inchi_keys:
+        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
+
+        with store._get_session() as db:
+            qm_conformers = [
+                {
+                    "qcarchive_id": record.qcarchive_id,
+                    "mapped_smiles": record.mapped_smiles,
+                    "coordinates": record.coordinates,
+                }
+                for record in db.db.query(
+                    DBQMConformerRecord,
+                )
+                .filter_by(parent_id=molecule_id)
+                .all()
+            ]
+
+            for qm_conformer in qm_conformers:
+                if not db._mm_conformer_already_exists(
+                    qcarchive_id=qm_conformer["qcarchive_id"],
+                    force_field=force_field,
+                ):
+                    _data[inchi_key].append(qm_conformer)
+                else:
+                    pass
+
+    if len(_data) == 0:
+        return
+
+    _minimized_blob = _minimize_blob(
+        input=_data,
+        force_field=force_field,
+        prune_isomorphs=prune_isomorphs,
+        n_processes=n_processes,
+        chunksize=chunksize,
+    )
+
+    with store._get_session() as db:
+        for result in _minimized_blob:
+            inchi_key = result.inchi_key
+            molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
+            record = (
+                MMConformerRecord(
+                    molecule_id=molecule_id,
+                    qcarchive_id=result.qcarchive_id,
+                    force_field=result.force_field,
+                    mapped_smiles=result.mapped_smiles,
+                    energy=result.energy,
+                    coordinates=result.coordinates,
+                ),
+            )
+            # inlined from MoleculeStore.store_conformer
+            if db._mm_conformer_already_exists(
+                record.qcarchive_id,
+                record.qcarchive_id,
+            ):
+                continue
+            else:
+                db.store_mm_conformer_record(record)
 
 
 @click.command()
