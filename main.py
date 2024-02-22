@@ -153,11 +153,14 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
+    make_csvs(store, forcefield, out_dir)
+    plot(out_dir)
+
+
+def make_csvs(store, forcefield, out_dir):
     store.get_dde(forcefield).to_csv(f"{out_dir}/dde.csv")
     store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")
     store.get_tfd(forcefield).to_csv(f"{out_dir}/tfd.csv")
-
-    plot(out_dir)
 
 
 def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
