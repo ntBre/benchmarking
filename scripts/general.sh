@@ -34,7 +34,7 @@ hostname
 source ~/.bashrc
 mamba activate ib-dev-esp
 
-python main.py \
+python -u main.py \
        --forcefield forcefields/$ff.offxml \
        --dataset datasets/cache/industry.json \
        --sqlite-file $ff.sqlite \
