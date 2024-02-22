@@ -158,8 +158,11 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
 
 
 def make_csvs(store, forcefield, out_dir):
+    print("getting DDEs")
     store.get_dde(forcefield).to_csv(f"{out_dir}/dde.csv")
+    print("getting RMSDs")
     store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")
+    print("getting TFDs")
     store.get_tfd(forcefield).to_csv(f"{out_dir}/tfd.csv")
 
 
