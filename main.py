@@ -29,6 +29,15 @@ warnings.filterwarnings(
 )
 
 
+def get_molecule_id_by_inchi_key(db, inchi_key):
+    return {
+        inchi_key: id
+        for (id, inchi_key) in reversed(
+            db.db.query(DBMoleculeRecord.id, DBMoleculeRecord.inchi_key).all()
+        )
+    }
+
+
 # copy of MoleculeStore.optimize_mm with db session optimizations
 def optimize_mm(
     store,
@@ -83,6 +92,10 @@ def optimize_mm(
     start = time.time()
     print("started storing records")
 
+    # this time the dict gives the same result as the list, at least for my
+    # small example, but I threw in a reversed just in case
+    inchi_to_id = get_molecule_id_by_inchi_key(db, inchi_key)
+
     with store._get_session() as db:
         # from _mm_conformer_already_exists
         seen = set(
@@ -92,7 +105,7 @@ def optimize_mm(
         )
         for result in _minimized_blob:
             inchi_key = result.inchi_key
-            molecule_id = get_molecule_id_by_inchi_key(db, inchi_key)
+            molecule_id = inchi_to_id[inchi_key]
             record = MMConformerRecord(
                 molecule_id=molecule_id,
                 qcarchive_id=result.qcarchive_id,
@@ -108,16 +121,9 @@ def optimize_mm(
             seen.add(record.qcarchive_id)
             db.store_mm_conformer_record(record)
 
+        print(f"closing db session after {time.time() - start} sec")
+
     print(f"finished storing records after {time.time() - start} sec")
-
-
-def get_molecule_id_by_inchi_key(db, inchi_key):
-    return [
-        id
-        for (id,) in db.db.query(DBMoleculeRecord.id)
-        .filter_by(inchi_key=inchi_key)
-        .all()
-    ][0]
 
 
 @click.command()
