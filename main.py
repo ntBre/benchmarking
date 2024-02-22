@@ -15,7 +15,9 @@ from ibstore._db import (
     DBQMConformerRecord,
     MMConformerRecord,
 )
+from ibstore.analysis import DDE, DDECollection
 from matplotlib import pyplot
+from tqdm import tqdm
 
 from cached_result import CachedResultCollection
 
@@ -126,6 +128,49 @@ def optimize_mm(
     print(f"finished storing records after {time.time() - start} sec")
 
 
+def get_dde(
+    store,
+    force_field: str,
+) -> DDECollection:
+    ddes = DDECollection()
+
+    for inchi_key in tqdm(store.get_inchi_keys(), desc="Processing inchis"):
+        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
+
+        qcarchive_ids = store.get_qcarchive_ids_by_molecule_id(molecule_id)
+
+        if len(qcarchive_ids) == 1:
+            # There's only one conformer for this molecule
+            # TODO: Quicker way of short-circuiting here
+            continue
+
+        qm_energies = store.get_qm_energies_by_molecule_id(molecule_id)
+        qm_energies -= numpy.array(qm_energies).min()
+
+        mm_energies = store.get_mm_energies_by_molecule_id(
+            molecule_id, force_field
+        )
+        if len(mm_energies) != len(qm_energies):
+            continue
+
+        mm_energies -= numpy.array(mm_energies).min()
+
+        for qm, mm, id in zip(
+            qm_energies,
+            mm_energies,
+            qcarchive_ids,
+        ):
+            ddes.append(
+                DDE(
+                    qcarchive_id=id,
+                    difference=mm - qm,
+                    force_field=force_field,
+                ),
+            )
+
+    return ddes
+
+
 @click.command()
 @click.option("--forcefield", "-f", default="force-field.offxml")
 @click.option("--dataset", "-d", default="datasets/cache/industry.json")
@@ -159,7 +204,7 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
 
 def make_csvs(store, forcefield, out_dir):
     print("getting DDEs")
-    store.get_dde(forcefield).to_csv(f"{out_dir}/dde.csv")
+    get_dde(store, forcefield).to_csv(f"{out_dir}/dde.csv")
     print("getting RMSDs")
     store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")
     print("getting TFDs")
