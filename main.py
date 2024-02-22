@@ -11,6 +11,7 @@ import seaborn as sea
 from ibstore import MoleculeStore
 from ibstore._db import (
     DBMMConformerRecord,
+    DBMoleculeRecord,
     DBQMConformerRecord,
     MMConformerRecord,
 )
@@ -91,7 +92,7 @@ def optimize_mm(
         )
         for result in _minimized_blob:
             inchi_key = result.inchi_key
-            molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
+            molecule_id = get_molecule_id_by_inchi_key(db, inchi_key)
             record = MMConformerRecord(
                 molecule_id=molecule_id,
                 qcarchive_id=result.qcarchive_id,
@@ -108,6 +109,15 @@ def optimize_mm(
             db.store_mm_conformer_record(record)
 
     print(f"finished storing records after {time.time() - start} sec")
+
+
+def get_molecule_id_by_inchi_key(db, inchi_key):
+    return [
+        id
+        for (id,) in db.db.query(DBMoleculeRecord.id)
+        .filter_by(inchi_key=inchi_key)
+        .all()
+    ][0]
 
 
 @click.command()
