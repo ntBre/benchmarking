@@ -15,8 +15,18 @@ from ibstore._db import (
     DBQMConformerRecord,
     MMConformerRecord,
 )
-from ibstore.analysis import DDE, DDECollection
+from ibstore.analysis import (
+    DDE,
+    RMSD,
+    TFD,
+    DDECollection,
+    RMSDCollection,
+    TFDCollection,
+    get_rmsd,
+    get_tfd,
+)
 from matplotlib import pyplot
+from openff.toolkit import Molecule
 from tqdm import tqdm
 
 from cached_result import CachedResultCollection
@@ -171,6 +181,77 @@ def get_dde(
     return ddes
 
 
+def my_get_rmsd(
+    store,
+    force_field: str,
+) -> RMSDCollection:
+    rmsds = RMSDCollection()
+
+    for inchi_key in tqdm(store.get_inchi_keys(), desc="Processing inchis"):
+        molecule = Molecule.from_inchi(inchi_key, allow_undefined_stereo=True)
+        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
+
+        qcarchive_ids = store.get_qcarchive_ids_by_molecule_id(molecule_id)
+
+        qm_conformers = store.get_qm_conformers_by_molecule_id(molecule_id)
+        mm_conformers = store.get_mm_conformers_by_molecule_id(
+            molecule_id,
+            force_field,
+        )
+
+        for qm, mm, id in zip(
+            qm_conformers,
+            mm_conformers,
+            qcarchive_ids,
+        ):
+            rmsds.append(
+                RMSD(
+                    qcarchive_id=id,
+                    rmsd=get_rmsd(molecule, qm, mm),
+                    force_field=force_field,
+                ),
+            )
+
+    return rmsds
+
+
+def my_get_tfd(
+    store,
+    force_field: str,
+) -> TFDCollection:
+    tfds = TFDCollection()
+
+    for inchi_key in tqdm(store.get_inchi_keys(), desc="Processing inchis"):
+        molecule = Molecule.from_inchi(inchi_key, allow_undefined_stereo=True)
+        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
+
+        qcarchive_ids = store.get_qcarchive_ids_by_molecule_id(molecule_id)
+
+        qm_conformers = store.get_qm_conformers_by_molecule_id(molecule_id)
+        mm_conformers = store.get_mm_conformers_by_molecule_id(
+            molecule_id,
+            force_field,
+        )
+
+        for qm, mm, id in zip(
+            qm_conformers,
+            mm_conformers,
+            qcarchive_ids,
+        ):
+            try:
+                tfds.append(
+                    TFD(
+                        qcarchive_id=id,
+                        tfd=get_tfd(molecule, qm, mm),
+                        force_field=force_field,
+                    ),
+                )
+            except Exception as e:
+                logging.warning(f"Molecule {inchi_key} failed with {str(e)}")
+
+    return tfds
+
+
 @click.command()
 @click.option("--forcefield", "-f", default="force-field.offxml")
 @click.option("--dataset", "-d", default="datasets/cache/industry.json")
@@ -206,9 +287,9 @@ def make_csvs(store, forcefield, out_dir):
     print("getting DDEs")
     get_dde(store, forcefield).to_csv(f"{out_dir}/dde.csv")
     print("getting RMSDs")
-    store.get_rmsd(forcefield).to_csv(f"{out_dir}/rmsd.csv")
+    my_get_rmsd(store, forcefield).to_csv(f"{out_dir}/rmsd.csv")
     print("getting TFDs")
-    store.get_tfd(forcefield).to_csv(f"{out_dir}/tfd.csv")
+    my_get_tfd(store, forcefield).to_csv(f"{out_dir}/tfd.csv")
 
 
 def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
