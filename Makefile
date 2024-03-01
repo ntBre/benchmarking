@@ -40,3 +40,11 @@ debug:
 
 datasets/cache/industry.json: datasets/industry.json
 	python cache_dataset.py --dataset $< --output $@
+
+plot.idivf:
+	python plot.py \
+idivf-sage-2.1.0 \
+nc-tm-idivf-sage-2.1.0 \
+refit-idivf-sage-2.1.0 \
+tm-idivf-sage-2.1.0 \
+sage-2.1.0
