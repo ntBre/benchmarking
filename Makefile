@@ -45,6 +45,5 @@ plot.idivf:
 	python plot.py \
 idivf-sage-2.1.0 \
 nc-tm-idivf-sage-2.1.0 \
-refit-idivf-sage-2.1.0 \
-tm-idivf-sage-2.1.0 \
+r-nc-tm-idivf-sage-2.1.0 \
 sage-2.1.0
