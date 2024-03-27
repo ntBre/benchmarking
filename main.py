@@ -2,34 +2,14 @@ import logging
 import os
 import time
 import warnings
-from collections import defaultdict
 
 import click
 import numpy
 import pandas
 import seaborn as sea
-from ibstore import MoleculeStore
-from ibstore._db import (
-    DBMMConformerRecord,
-    DBMoleculeRecord,
-    DBQMConformerRecord,
-    MMConformerRecord,
-)
-from ibstore.analysis import (
-    DDE,
-    RMSD,
-    TFD,
-    DDECollection,
-    RMSDCollection,
-    TFDCollection,
-    get_rmsd,
-    get_tfd,
-)
 from matplotlib import pyplot
-from openff.toolkit import Molecule
-from tqdm import tqdm
-
-from cached_result import CachedResultCollection
+from yammbs import MoleculeStore
+from yammbs.cached_result import CachedResultCollection
 
 # try to suppress stereo warnings - from lily's valence-fitting
 # curate-dataset.py
@@ -39,217 +19,6 @@ logging.getLogger("openff").setLevel(logging.ERROR)
 warnings.filterwarnings(
     "ignore", message="divide by zero", category=RuntimeWarning
 )
-
-
-def get_molecule_id_by_inchi_key(db, inchi_key):
-    return {
-        inchi_key: id
-        for (id, inchi_key) in reversed(
-            db.db.query(DBMoleculeRecord.id, DBMoleculeRecord.inchi_key).all()
-        )
-    }
-
-
-# copy of MoleculeStore.optimize_mm with db session optimizations
-def optimize_mm(
-    store,
-    force_field: str,
-    prune_isomorphs: bool = False,
-    n_processes: int = 2,
-    chunksize=32,
-):
-    from ibstore._minimize import _minimize_blob
-
-    inchi_keys = store.get_inchi_keys()
-
-    _data = defaultdict(list)
-
-    for inchi_key in inchi_keys:
-        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
-
-        with store._get_session() as db:
-            qm_conformers = [
-                {
-                    "qcarchive_id": record.qcarchive_id,
-                    "mapped_smiles": record.mapped_smiles,
-                    "coordinates": record.coordinates,
-                }
-                for record in db.db.query(
-                    DBQMConformerRecord,
-                )
-                .filter_by(parent_id=molecule_id)
-                .all()
-            ]
-
-            for qm_conformer in qm_conformers:
-                if not db._mm_conformer_already_exists(
-                    qcarchive_id=qm_conformer["qcarchive_id"],
-                    force_field=force_field,
-                ):
-                    _data[inchi_key].append(qm_conformer)
-                else:
-                    pass
-
-    if len(_data) == 0:
-        return
-
-    _minimized_blob = _minimize_blob(
-        input=_data,
-        force_field=force_field,
-        prune_isomorphs=prune_isomorphs,
-        n_processes=n_processes,
-        chunksize=chunksize,
-    )
-
-    start = time.time()
-    print("started storing records")
-
-    # this time the dict gives the same result as the list, at least for my
-    # small example, but I threw in a reversed just in case
-    inchi_to_id = get_molecule_id_by_inchi_key(db, inchi_key)
-
-    with store._get_session() as db:
-        # from _mm_conformer_already_exists
-        seen = set(
-            db.db.query(
-                DBMMConformerRecord.qcarchive_id,
-            )
-        )
-        for result in _minimized_blob:
-            inchi_key = result.inchi_key
-            molecule_id = inchi_to_id[inchi_key]
-            record = MMConformerRecord(
-                molecule_id=molecule_id,
-                qcarchive_id=result.qcarchive_id,
-                force_field=result.force_field,
-                mapped_smiles=result.mapped_smiles,
-                energy=result.energy,
-                coordinates=result.coordinates,
-            )
-            # inlined from MoleculeStore.store_conformer
-            if record.qcarchive_id in seen:
-                print("already seen this record, skipping")
-                continue
-            seen.add(record.qcarchive_id)
-            db.store_mm_conformer_record(record)
-
-        print(f"closing db session after {time.time() - start} sec")
-
-    print(f"finished storing records after {time.time() - start} sec")
-
-
-def get_dde(
-    store,
-    force_field: str,
-) -> DDECollection:
-    ddes = DDECollection()
-
-    for inchi_key in tqdm(store.get_inchi_keys(), desc="Processing inchis"):
-        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
-
-        qcarchive_ids = store.get_qcarchive_ids_by_molecule_id(molecule_id)
-
-        if len(qcarchive_ids) == 1:
-            # There's only one conformer for this molecule
-            # TODO: Quicker way of short-circuiting here
-            continue
-
-        qm_energies = store.get_qm_energies_by_molecule_id(molecule_id)
-        qm_energies -= numpy.array(qm_energies).min()
-
-        mm_energies = store.get_mm_energies_by_molecule_id(
-            molecule_id, force_field
-        )
-        if len(mm_energies) != len(qm_energies):
-            continue
-
-        mm_energies -= numpy.array(mm_energies).min()
-
-        for qm, mm, id in zip(
-            qm_energies,
-            mm_energies,
-            qcarchive_ids,
-        ):
-            ddes.append(
-                DDE(
-                    qcarchive_id=id,
-                    difference=mm - qm,
-                    force_field=force_field,
-                ),
-            )
-
-    return ddes
-
-
-def my_get_rmsd(
-    store,
-    force_field: str,
-) -> RMSDCollection:
-    rmsds = RMSDCollection()
-
-    for inchi_key in tqdm(store.get_inchi_keys(), desc="Processing inchis"):
-        molecule = Molecule.from_inchi(inchi_key, allow_undefined_stereo=True)
-        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
-
-        qcarchive_ids = store.get_qcarchive_ids_by_molecule_id(molecule_id)
-
-        qm_conformers = store.get_qm_conformers_by_molecule_id(molecule_id)
-        mm_conformers = store.get_mm_conformers_by_molecule_id(
-            molecule_id,
-            force_field,
-        )
-
-        for qm, mm, id in zip(
-            qm_conformers,
-            mm_conformers,
-            qcarchive_ids,
-        ):
-            rmsds.append(
-                RMSD(
-                    qcarchive_id=id,
-                    rmsd=get_rmsd(molecule, qm, mm),
-                    force_field=force_field,
-                ),
-            )
-
-    return rmsds
-
-
-def my_get_tfd(
-    store,
-    force_field: str,
-) -> TFDCollection:
-    tfds = TFDCollection()
-
-    for inchi_key in tqdm(store.get_inchi_keys(), desc="Processing inchis"):
-        molecule = Molecule.from_inchi(inchi_key, allow_undefined_stereo=True)
-        molecule_id = store.get_molecule_id_by_inchi_key(inchi_key)
-
-        qcarchive_ids = store.get_qcarchive_ids_by_molecule_id(molecule_id)
-
-        qm_conformers = store.get_qm_conformers_by_molecule_id(molecule_id)
-        mm_conformers = store.get_mm_conformers_by_molecule_id(
-            molecule_id,
-            force_field,
-        )
-
-        for qm, mm, id in zip(
-            qm_conformers,
-            mm_conformers,
-            qcarchive_ids,
-        ):
-            try:
-                tfds.append(
-                    TFD(
-                        qcarchive_id=id,
-                        tfd=get_tfd(molecule, qm, mm),
-                        force_field=force_field,
-                    ),
-                )
-            except Exception as e:
-                logging.warning(f"Molecule {inchi_key} failed with {str(e)}")
-
-    return tfds
 
 
 @click.command()
@@ -267,13 +36,12 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
         store = MoleculeStore(sqlite_file)
     else:
         print(f"loading cached dataset from {dataset}", flush=True)
-        store = CachedResultCollection.from_json(dataset).into_store(
-            sqlite_file
-        )
+        crc = CachedResultCollection.from_json(dataset)
+        store = MoleculeStore.from_cached_result_collection(crc, sqlite_file)
 
     print("started optimizing store", flush=True)
     start = time.time()
-    optimize_mm(store, force_field=forcefield, n_processes=procs)
+    store.optimize_mm(force_field=forcefield, n_processes=procs)
     print(f"finished optimizing after {time.time() - start} sec")
 
     if not os.path.exists(out_dir):
@@ -285,11 +53,15 @@ def main(forcefield, dataset, sqlite_file, out_dir, procs, invalidate_cache):
 
 def make_csvs(store, forcefield, out_dir):
     print("getting DDEs")
-    get_dde(store, forcefield).to_csv(f"{out_dir}/dde.csv")
+    store.get_dde(forcefield, skip_check=True).to_csv(f"{out_dir}/dde.csv")
     print("getting RMSDs")
-    my_get_rmsd(store, forcefield).to_csv(f"{out_dir}/rmsd.csv")
+    store.get_rmsd(forcefield, skip_check=True).to_csv(f"{out_dir}/rmsd.csv")
     print("getting TFDs")
-    my_get_tfd(store, forcefield).to_csv(f"{out_dir}/tfd.csv")
+    store.get_tfd(forcefield, skip_check=True).to_csv(f"{out_dir}/tfd.csv")
+    print("getting internal coordinate RMSDs")
+    store.get_internal_coordinate_rmsd(forcefield, skip_check=True).to_csv(
+        f"{out_dir}/icrmsd.csv"
+    )
 
 
 def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
