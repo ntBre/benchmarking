@@ -5,8 +5,7 @@
 *.err
 __pycache__/
 status
-/triage.json
 /triage/target/
-/*.triage.json
+*triage.json
 *.bz2
 /datasets/cache/industry.json
