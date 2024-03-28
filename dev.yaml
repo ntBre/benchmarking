@@ -1,0 +1,30 @@
+name: yammbs-dev
+channels:
+  - openeye
+  - conda-forge
+dependencies:
+  - python
+
+  - openff-toolkit
+  - openff-qcsubmit
+  - openmmforcefields
+  - smirnoff-plugins
+  # espaloma =0.3
+  - geometric =1
+  - pydantic =2
+
+  - ipython
+  - ipdb
+  - pre-commit
+
+  - openeye::openeye-toolkits
+  - rich
+
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - pytest-randomly
+  - pytest-timeout
+
+  - pip:
+    - git+https://github.com/jthorton/de-forcefields.git@eb99f5ea1347dc3fd079038a52a21554b9e44caf
