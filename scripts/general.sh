@@ -2,10 +2,10 @@ set -e
 
 ff=$1
 shift
-ncpus=8
+ncpus=48
 hours=84
-mem=64
-env=ib-dev-esp
+mem=24
+env=yammbs-dev
 
 cmd=sbatch
 
@@ -34,6 +34,7 @@ $cmd <<INP
 #SBATCH --export ALL
 #SBATCH --mail-user=bwestbr1@uci.edu
 #SBATCH --constraint=fastscratch
+#SBATCH --output=bench.slurm.out
 
 date
 hostname
