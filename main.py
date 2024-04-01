@@ -8,8 +8,12 @@ import numpy
 import pandas
 import seaborn as sea
 from matplotlib import pyplot
+from openff.toolkit.utils import OpenEyeToolkitWrapper
 from yammbs import MoleculeStore
 from yammbs.cached_result import CachedResultCollection
+
+
+assert OpenEyeToolkitWrapper().is_available()
 
 # try to suppress stereo warnings - from lily's valence-fitting
 # curate-dataset.py

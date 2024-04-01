@@ -42,6 +42,8 @@ hostname
 source ~/.bashrc
 mamba activate $env
 
+echo \$OE_LICENSE
+
 python -u main.py \
        --forcefield forcefields/$ff.offxml \
        --dataset datasets/cache/industry.json \
