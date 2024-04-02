@@ -12,7 +12,6 @@ from openff.toolkit.utils import OpenEyeToolkitWrapper
 from yammbs import MoleculeStore
 from yammbs.cached_result import CachedResultCollection
 
-
 assert OpenEyeToolkitWrapper().is_available()
 
 # try to suppress stereo warnings - from lily's valence-fitting
@@ -89,15 +88,11 @@ def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
         "rmsd": (-2.0, 0.7),
         "tfd": (-4.0, 0.5),
     }
-    for dtype in ["step_dde", "rmsd", "tfd"]:
+    for dtype in ["dde", "rmsd", "tfd"]:
         figure, axis = pyplot.subplots(figsize=(6, 4))
 
         for name, in_dir in zip(names, in_dirs):
-            if dtype == "step_dde":
-                read = "dde"
-            else:
-                read = dtype
-            dataframe = pandas.read_csv(f"{in_dir}/{read}.csv")
+            dataframe = pandas.read_csv(f"{in_dir}/{dtype}.csv")
             dataframe = dataframe.rename(columns={"Unnamed: 0": "Record ID"})
 
             if filter_records is not None:
@@ -112,7 +107,7 @@ def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
                         dataframe["Record ID"].astype(str).isin(filter_records)
                     ]
 
-            if dtype == "step_dde":
+            if dtype == "dde":
                 counts, bins = numpy.histogram(
                     dataframe[dataframe.columns[-1]],
                     bins=numpy.linspace(-15, 15, 16),
