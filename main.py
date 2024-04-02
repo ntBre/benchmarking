@@ -89,7 +89,7 @@ def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
         "rmsd": (-2.0, 0.7),
         "tfd": (-4.0, 0.5),
     }
-    for dtype in ["step_dde", "dde", "rmsd", "tfd"]:
+    for dtype in ["step_dde", "rmsd", "tfd"]:
         figure, axis = pyplot.subplots(figsize=(6, 4))
 
         for name, in_dir in zip(names, in_dirs):
@@ -112,16 +112,7 @@ def plot(out_dir, in_dirs=None, names=None, filter_records=None, negate=False):
                         dataframe["Record ID"].astype(str).isin(filter_records)
                     ]
 
-            if dtype == "dde":
-                sea.kdeplot(
-                    data=dataframe[dataframe.columns[-1]],
-                    ax=axis,
-                    label=name,
-                )
-                label = "DDE (kcal mol$^{-1}$)"
-                axis.set_ylabel("Density")
-                axis.set_xlim(x_ranges[dtype])
-            elif dtype == "step_dde":
+            if dtype == "step_dde":
                 counts, bins = numpy.histogram(
                     dataframe[dataframe.columns[-1]],
                     bins=numpy.linspace(-15, 15, 16),
