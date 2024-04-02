@@ -4,7 +4,7 @@ ff=$1
 shift
 ncpus=48
 hours=84
-mem=24
+mem=32
 env=yammbs-dev
 
 cmd=sbatch
@@ -38,6 +38,7 @@ $cmd <<INP
 
 date
 hostname
+echo \$SLURM_JOB_ID
 
 source ~/.bashrc
 mamba activate $env
