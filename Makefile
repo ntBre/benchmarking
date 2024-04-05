@@ -51,4 +51,4 @@ sage-2.1.0
 # torsion multiplicity project with supplemental data set. now comparing both to
 # sage 2.1 and 2.2
 plot.tm:
-	python plot.py sage-2.1.0 sage-2.2.0 tm-supp
+	python plot.py sage-2.1.0 sage-2.2.0 tm-supp tm-2.2
