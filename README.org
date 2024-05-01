@@ -109,3 +109,7 @@
   |                 | submit.sh          | run the benchmarks on the full-opt dataset                |
   |-----------------+--------------------+-----------------------------------------------------------|
   | full-opt-output | *                  | Benchmark output on full-opt dataset                      |
+
+* Changelog
+  - 2024-05-01 cp /pub/amcisaac/sage-2.2.0/05_benchmark_forcefield/datasets/OpenFF-Industry-Benchmark-Season-1-v1.1-filtered-charge-coverage-cache.json datasets/cache/industry.json
+    - copied Lexie's re-filtered, cached dataset over my previous cache
