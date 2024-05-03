@@ -5,7 +5,7 @@ shift
 ncpus=48
 hours=84
 mem=32
-env=yammbs-dev
+env=fb-196-qcnew
 
 cmd=sbatch
 
