@@ -10,3 +10,9 @@ status
 *.bz2
 /datasets/cache/industry.json
 /logs
+current/main.aux
+current/main.log
+current/main.nav
+current/main.snm
+current/main.toc
+current/main.vrb

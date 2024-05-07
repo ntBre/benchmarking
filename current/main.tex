@@ -1,0 +1,73 @@
+\documentclass{beamer}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% no numbers
+\setbeamerfont{footnote}{size=\tiny}
+\setbeamertemplate{footnote}{%
+  \parindent 1em\noindent%
+  \raggedright
+  \insertfootnotetext\par%
+}
+
+\usepackage{graphicx}
+\usepackage{chemfig}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  filecolor=magenta,
+  urlcolor=cyan,
+  pdfpagemode=FullScreen,
+}
+
+\parskip=20pt
+
+\newcommand\kcal{kcal mol$^{-1}$}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Results}
+  \includegraphics[width=0.49\textwidth]{figs/dde.png}
+  \includegraphics[width=0.49\textwidth]{figs/rmsd.png}
+  \includegraphics[width=0.49\textwidth]{figs/tfd.png}
+\end{frame}
+
+\begin{frame}
+  \frametitle{DDE}
+  \begin{center}
+    \includegraphics[height=0.8\textheight]{figs/dde}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{RMSD}
+  \begin{center}
+    \includegraphics[height=0.8\textheight]{figs/rmsd}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{TFD}
+  \begin{center}
+    \includegraphics[height=0.8\textheight]{figs/tfd}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Summary}
+  \begin{table}
+    \centering
+    \begin{tabular}{llrrrr}
+      Force Field & Metric & Avg & MAE & Mdn & SD \\
+      \hline
+      \input{tabs/stats}
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\end{document}

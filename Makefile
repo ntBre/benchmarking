@@ -51,4 +51,6 @@ sage-2.1.0
 # torsion multiplicity project with supplemental data set. now comparing both to
 # sage 2.1 and 2.2
 plot.tm:
-	python plot.py sage-2.1.0 sage-2.2.0 tm-2.2
+	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2
+	sed -E -i 's/ -([0-9]+\.)/$$-$$\1/g' current/tabs/stats.tex
+	cd current && pdflatex main.tex
