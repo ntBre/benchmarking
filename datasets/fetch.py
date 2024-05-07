@@ -8,5 +8,5 @@ dataset = OptimizationResultCollection.from_server(
     spec_name="default",
 )
 
-with open("supp.json", "w") as out:
+with open("unfiltered-supp.json", "w") as out:
     out.write(dataset.json(indent=2))
