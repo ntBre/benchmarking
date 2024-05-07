@@ -6,15 +6,17 @@ ncpus=48
 hours=84
 mem=32
 env=fb-196-qcnew
+dataset=industry
 
 cmd=sbatch
 
-while getopts "c:t:m:h:de:" arg; do
+while getopts "c:t:m:h:s:de:" arg; do
 	case $arg in
 		h) echo 'usage: [-c CPUS] [-t CPU_HOURS] [-m GB_MEMORY] [-h]' ;;
 		c) ncpus=$OPTARG ;;
 		t) hours=$OPTARG ;;
 		m) mem=$OPTARG ;;
+		s) dataset=$OPTARG ;;
 		d) cmd=cat ;; # dry run
 		e) env=$OPTARG ;; # conda env
 	esac
@@ -47,9 +49,9 @@ echo \$OE_LICENSE
 
 python -u main.py \
        --forcefield forcefields/$ff.offxml \
-       --dataset datasets/cache/industry.json \
+       --dataset datasets/cache/$dataset.json \
        --sqlite-file $ff.sqlite \
-       --out-dir output/industry/$ff \
+       --out-dir output/$dataset/$ff \
        --procs $ncpus \
        --invalidate-cache
 
