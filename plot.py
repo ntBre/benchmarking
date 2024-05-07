@@ -37,10 +37,10 @@ def stats(dirs, out):
         print("\\hline", file=out)
 
 
-def plotter(ffs, names=None):
+def plotter(ffs, dir="industry", names=None):
     if names is None:
         names = ffs
-    dirs = [f"output/industry/{ff}" for ff in ffs]
+    dirs = [f"output/{dir}/{ff}" for ff in ffs]
     plot("current/figs", dirs, names)
     with open("current/tabs/stats.tex", "w") as out:
         stats(dirs, out)
@@ -50,4 +50,9 @@ if __name__ == "__main__":
     if len(argv) < 2:
         print("Usage: plot.py [FORCEFIELD...]")
         exit(1)
-    plotter(argv[1:])
+    rest = argv[1:]
+    dir = "industry"
+    if argv[1] == "-d":
+        dir = argv[2]
+        rest = argv[3:]
+    plotter(rest, dir=dir)

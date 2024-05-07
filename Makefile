@@ -54,3 +54,8 @@ plot.tm:
 	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2
 	sed -E -i 's/ -([0-9]+\.)/$$-$$\1/g' current/tabs/stats.tex
 	cd current && pdflatex main.tex
+
+plot.supp:
+	python plot.py -d supp sage-2.2.0 tm-2.2 ultra-tm-2.2
+	sed -E -i 's/ -([0-9]+\.)/$$-$$\1/g' current/tabs/stats.tex
+	cd current && pdflatex main.tex
