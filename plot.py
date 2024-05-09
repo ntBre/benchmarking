@@ -1,6 +1,7 @@
 from pathlib import Path
 from sys import argv
 
+import click
 import numpy as np
 import pandas as pd
 
@@ -37,22 +38,23 @@ def stats(dirs, out):
         print("\\hline", file=out)
 
 
-def plotter(ffs, dir="industry", names=None):
+def plotter(ffs, dir="industry", names=None, **kwargs):
     if names is None:
         names = ffs
     dirs = [f"output/{dir}/{ff}" for ff in ffs]
-    plot("current/figs", dirs, names)
+    plot("current/figs", dirs, names, **kwargs)
     with open("current/tabs/stats.tex", "w") as out:
         stats(dirs, out)
 
 
+@click.command()
+@click.argument("forcefields", nargs=-1)
+@click.option("--dir", "-d", default="industry")
+@click.option("--filter-records", "-r", default=None)
+@click.option("--negate", "-n", is_flag=True, default=False)
+def main(forcefields, dir, filter_records, negate):
+    plotter(forcefields, dir=dir, filter_records=filter_records, negate=negate)
+
+
 if __name__ == "__main__":
-    if len(argv) < 2:
-        print("Usage: plot.py [FORCEFIELD...]")
-        exit(1)
-    rest = argv[1:]
-    dir = "industry"
-    if argv[1] == "-d":
-        dir = argv[2]
-        rest = argv[3:]
-    plotter(rest, dir=dir)
+    main()
