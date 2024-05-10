@@ -1,5 +1,4 @@
 from pathlib import Path
-from sys import argv
 
 import click
 import numpy as np
@@ -10,17 +9,23 @@ from main import plot
 pd.set_option("display.max_columns", None)
 
 
+def load_csvs(dir: Path):
+    """Load the DDE, RMSD, and TFD CSV files in `dir` and return the merged
+    dataframe"""
+    dde = pd.read_csv(dir / "dde.csv")
+    dde.columns = ["rec_id", "dde"]
+    rmsd = pd.read_csv(dir / "rmsd.csv")
+    rmsd.columns = ["rec_id", "rmsd"]
+    tfd = pd.read_csv(dir / "tfd.csv")
+    tfd.columns = ["rec_id", "tfd"]
+    return dde.merge(rmsd).pipe(pd.DataFrame.merge, tfd)
+
+
 def stats(dirs, out):
     res = []
     for d in dirs:
         d = Path(d)
-        dde = pd.read_csv(d / "dde.csv")
-        dde.columns = ["rec_id", "dde"]
-        rmsd = pd.read_csv(d / "rmsd.csv")
-        rmsd.columns = ["rec_id", "rmsd"]
-        tfd = pd.read_csv(d / "tfd.csv")
-        tfd.columns = ["rec_id", "tfd"]
-        df = dde.merge(rmsd).pipe(pd.DataFrame.merge, tfd)
+        df = load_csvs(d)
         res.append((d.name, df))
 
     for m in ["dde", "rmsd", "tfd"]:
@@ -38,22 +43,35 @@ def stats(dirs, out):
         print("\\hline", file=out)
 
 
-def plotter(ffs, dir="industry", names=None, **kwargs):
+def plotter(ffs, output_dir, input_dir="industry", names=None, **kwargs):
     if names is None:
         names = ffs
-    dirs = [f"output/{dir}/{ff}" for ff in ffs]
-    plot("current/figs", dirs, names, **kwargs)
+    dirs = [f"output/{input_dir}/{ff}" for ff in ffs]
+    out_path = Path(output_dir)
+    out_path.mkdir(exist_ok=True)
+    plot(output_dir, dirs, names, **kwargs)
     with open("current/tabs/stats.tex", "w") as out:
         stats(dirs, out)
 
 
 @click.command()
 @click.argument("forcefields", nargs=-1)
-@click.option("--dir", "-d", default="industry")
+@click.option("--input-dir", "-d", default="industry")
 @click.option("--filter-records", "-r", default=None)
 @click.option("--negate", "-n", is_flag=True, default=False)
-def main(forcefields, dir, filter_records, negate):
-    plotter(forcefields, dir=dir, filter_records=filter_records, negate=negate)
+@click.option("--output_dir", "-o", default="current/figs")
+def main(forcefields, input_dir, filter_records, negate, output_dir):
+    if filter_records is not None:
+        # assume it's the name of a file
+        with open(filter_records) as inp:
+            filter_records = [line.strip() for line in inp]
+    plotter(
+        forcefields,
+        output_dir,
+        input_dir=input_dir,
+        filter_records=filter_records,
+        negate=negate,
+    )
 
 
 if __name__ == "__main__":

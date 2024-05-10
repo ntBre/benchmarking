@@ -48,6 +48,10 @@ nc-tm-idivf-sage-2.1.0 \
 r-nc-tm-idivf-sage-2.1.0 \
 sage-2.1.0
 
+# usage:
+# $(call plot,FFS[,DIR][,FILTER][,NEGATE])
+plot = python plot.py $1 $(if $2, -d $2) $(if $3, -f $3) $(if $4, -n)
+
 # torsion multiplicity project with supplemental data set. now comparing both to
 # sage 2.1 and 2.2
 plot.tm:
@@ -56,6 +60,14 @@ plot.tm:
 	cd current && pdflatex main.tex
 
 plot.supp:
-	python plot.py -d supp sage-2.2.0 tm-2.2 ultra-tm-2.2
-	sed -E -i 's/ -([0-9]+\.)/$$-$$\1/g' current/tabs/stats.tex
-	cd current && pdflatex main.tex
+	python plot.py -d supp sage-2.2.0 tm-2.2 ultra-tm-2.2 -o current/figs/supp
+
+# label ultra-tm-2.2 parameters with their associated record ids. it should be
+# easiest to work backwards from the most specific parameters in ultra-tm to the
+# parent parameters in tm-2.2 and sage-2.2
+filters/ultra-tm.json:
+	python label.py -c output/industry/ultra-tm-2.2 -f ultra-tm-2.2.offxml -o $@
+
+plot.subsets:
+	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2 -r ultra-tm.dat -o current/figs/in_tm
+	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2 -r ultra-tm.dat -o current/figs/out_tm -n
