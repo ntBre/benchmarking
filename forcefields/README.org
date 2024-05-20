@@ -1,33 +1,34 @@
 
-| FF                     | Description                                                                       |
-|------------------------+-----------------------------------------------------------------------------------|
-| 2.2-split-v1           |                                                                                   |
-| 2.2-v2                 |                                                                                   |
-| besmarts-ba            |                                                                                   |
-| cached-sage-2.1.0      |                                                                                   |
-| esp-full-full          |                                                                                   |
-| esp-full-refit         |                                                                                   |
-| esp-full               |                                                                                   |
-| esp-tors-10            |                                                                                   |
-| espaloma-all-refit     |                                                                                   |
-| espaloma-all           |                                                                                   |
-| idivf-sage-2.1.0       | Sage 2.1.0 with all proper torsion idivfs set to experimental-auto                |
-| msm-split              |                                                                                   |
-| msm                    |                                                                                   |
-| my-sage-2.1.0          |                                                                                   |
-| nc-tm-idivf-sage-2.1.0 | Sage 2.1.0 with TM param idivfs set to experimental-auto and connectivity removed |
-| pavan-2.1.0            |                                                                                   |
-| pavan-repeat           |                                                                                   |
-| refit-idivf-sage-2.1.0 | Sage 2.1.0 with TM param idivfs set to experimental-auto and refit with FB        |
-| sage-2.1.0             | Original Sage 2.1.0                                                               |
-| sage-sage-new-filter   |                                                                                   |
-| sage-sage              |                                                                                   |
-| sage-tm                |                                                                                   |
-| simon-smee-v2          |                                                                                   |
-| smee1000               | My smee run after "1000" iterations but restart didn't work quite right           |
-| smee900                | My smee run after 900 iterations                                                  |
-| tm-idivf-sage-2.1.0    | Sage 2.1.0 with TM param idivfs set to experimental-auto                          |
-| tm-new                 |                                                                                   |
-| tm-tm                  |                                                                                   |
-| tm                     |                                                                                   |
-| v2-tm                  |                                                                                   |
+| FF                       | Description                                                                                       |
+|--------------------------+---------------------------------------------------------------------------------------------------|
+| 2.2-split-v1             |                                                                                                   |
+| 2.2-v2                   |                                                                                                   |
+| besmarts-ba              |                                                                                                   |
+| cached-sage-2.1.0        |                                                                                                   |
+| esp-full                 |                                                                                                   |
+| esp-full-full            |                                                                                                   |
+| esp-full-refit           |                                                                                                   |
+| esp-tors-10              |                                                                                                   |
+| espaloma-all             |                                                                                                   |
+| espaloma-all-refit       |                                                                                                   |
+| idivf-sage-2.1.0         | Sage 2.1.0 with all proper torsion idivfs set to experimental-auto                                |
+| msm                      |                                                                                                   |
+| msm-split                |                                                                                                   |
+| my-sage-2.1.0            |                                                                                                   |
+| nc-tm-idivf-sage-2.1.0   | Sage 2.1.0 with TM param idivfs set to experimental-auto and connectivity removed                 |
+| pavan-2.1.0              |                                                                                                   |
+| pavan-repeat             |                                                                                                   |
+| r-nc-tm-idivf-sage-2.1.0 | Sage 2.1.0 with TM param idivfs set to experimental-auto, connectivity removed, and refit with FB |
+| refit-idivf-sage-2.1.0   | Sage 2.1.0 with TM param idivfs set to experimental-auto and refit with FB                        |
+| sage-2.1.0               | Original Sage 2.1.0                                                                               |
+| sage-sage                |                                                                                                   |
+| sage-sage-new-filter     |                                                                                                   |
+| sage-tm                  |                                                                                                   |
+| simon-smee-v2            |                                                                                                   |
+| smee1000                 | My smee run after "1000" iterations but restart didn't work quite right                           |
+| smee900                  | My smee run after 900 iterations                                                                  |
+| tm                       |                                                                                                   |
+| tm-idivf-sage-2.1.0      | Sage 2.1.0 with TM param idivfs set to experimental-auto                                          |
+| tm-new                   |                                                                                                   |
+| tm-tm                    |                                                                                                   |
+| v2-tm                    |                                                                                                   |
