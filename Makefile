@@ -71,3 +71,6 @@ filters/ultra-tm.json:
 plot.subsets:
 	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2 -r ultra-tm.dat -o current/figs/in_tm
 	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2 -r ultra-tm.dat -o current/figs/out_tm -n
+
+plot.smee:
+	python plot.py sage-2.1.0 smee-sage-2.1.0-opt -o /tmp
