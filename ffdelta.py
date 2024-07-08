@@ -3,6 +3,7 @@
 import sys
 
 from openff.toolkit import ForceField
+from openff.units import unit
 
 
 class Bonds:
@@ -10,7 +11,10 @@ class Bonds:
 
     @classmethod
     def fields(_cls):
-        return ["length", "k"]
+        return [
+            ("length", unit.angstrom),
+            ("k", unit.kcal / unit.mole / unit.angstrom**2),
+        ]
 
 
 class Angles:
@@ -18,7 +22,10 @@ class Angles:
 
     @classmethod
     def fields(_cls):
-        return ["angle", "k"]
+        return [
+            ("angle", unit.degree),
+            ("k", unit.kcal / unit.mole / unit.radians**2),
+        ]
 
 
 class ProperTorsions:
@@ -26,7 +33,7 @@ class ProperTorsions:
 
     @classmethod
     def fields(_cls):
-        return ["k"]
+        return [("k", unit.kcal / unit.mole)]
 
 
 ff1 = ForceField(sys.argv[1])
@@ -41,20 +48,20 @@ for ptype in [Bonds, Angles, ProperTorsions]:
     h = ff2.get_parameter_handler(ptype.name)
     for p, q in zip(g.parameters, h.parameters):
         assert p.id == q.id
-        for field in ptype.fields():
+        for field, units in ptype.fields():
             f = getattr(p, field)
             if isinstance(f, list):
                 for i, (v1, v2) in enumerate(zip(f, getattr(q, field))):
-                    v1 = v1.magnitude
-                    v2 = v2.magnitude
+                    v1 = v1.to(units).magnitude
+                    v2 = v2.to(units).magnitude
                     fl = f"{field}{i+1}"
                     print(
                         f"{p.id:>{lw}} {fl:>{lw}.3}"
                         f" {v1:{fw}.{fp}f} {v2:{fw}.{fp}f} {v2-v1:{fw}.{fp}f}"
                     )
             else:
-                v1 = getattr(p, field).magnitude
-                v2 = getattr(q, field).magnitude
+                v1 = getattr(p, field).to(units).magnitude
+                v2 = getattr(q, field).to(units).magnitude
                 print(
                     f"{p.id:>{lw}} {field:>{lw}.3}"
                     f" {v1:{fw}.{fp}f} {v2:{fw}.{fp}f} {v2-v1:{fw}.{fp}f}"
