@@ -55,9 +55,9 @@ plot = python plot.py $1 $(if $2, -d $2) $(if $3, -f $3) $(if $4, -n)
 # torsion multiplicity project with supplemental data set. now comparing both to
 # sage 2.1 and 2.2
 plot.tm:
-	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2
-	sed -E -i 's/ -([0-9]+\.)/$$-$$\1/g' current/tabs/stats.tex
-	cd current && pdflatex main.tex
+	python plot.py sage-2.1.0 sage-2.2.0 new-tm-2.2 -o /tmp
+	# sed -E -i 's/ -([0-9]+\.)/$$-$$\1/g' current/tabs/stats.tex
+	# cd current && pdflatex main.tex
 
 plot.supp:
 	python plot.py -d supp sage-2.2.0 tm-2.2 ultra-tm-2.2 -o current/figs/supp
@@ -73,4 +73,4 @@ plot.subsets:
 	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2 -r ultra-tm.dat -o current/figs/out_tm -n
 
 plot.smee:
-	python plot.py sage-2.1.0 smee-sage-2.1.0-opt smee900 -o /tmp
+	python plot.py sage-2.1.0 smee-sage-2.1.0-opt smee-sage-2.1.0-opt-td -o /tmp
