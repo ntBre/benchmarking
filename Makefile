@@ -73,4 +73,7 @@ plot.subsets:
 	python plot.py sage-2.2.0 tm-2.2 ultra-tm-2.2 -r ultra-tm.dat -o current/figs/out_tm -n
 
 plot.smee:
-	python plot.py sage-2.1.0 smee-sage-2.1.0-opt smee-sage-2.1.0-opt-td -o /tmp
+	python ../openff-benchmarks/plot.py openff-2.1.0 smee-sage-2.1.0-opt smee-sage-2.1.0-opt-td xff300 -o /tmp
+
+plot.besmarts:
+	python ../openff-benchmarks/plot.py openff-2.1.0 openff-2.2.0 tm tm_besmarts_reset_on_gen2 -o /tmp
