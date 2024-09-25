@@ -17,4 +17,11 @@ current/main.snm
 current/main.toc
 current/main.vrb
 /datasets/old/
-/filters/
+/filters/tm.in.dat
+/filters/ultra-tm.json
+/filters/_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor
+/_site/

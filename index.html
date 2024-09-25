@@ -1,31 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+---
+layout: basic
+---
+{% assign static_files = site.static_files | where: "isdir", true %}
 
-	<script src="plotly-2.35.2.min.js" charset="utf-8"></script>
+<div id="tester"></div>
 
-	<title>benchmarking</title>
-  </head>
-  <body>
-	<div id="tester" style="width:600px;height:250px;"></div>
-  </body>
+<h2>Available datasets</h2>
+<div id="app"></div>
 
-  <h2>site.pages</h2>
-  {{site.pages}}
+<script>
+  const PAGES = [
+{% for page in static_files %}
+	  "{{ page.path }}",
+{% endfor %}
+  ];
+  let dirs = PAGES.map((x) => x.replace(/\/output\/industry\/([^/]+)\/.*$/, '$1'));
+  let unique_dirs = [...new Set(dirs)];
+  let parent = document.getElementById("app");
+  for (dir of unique_dirs) {
+	  let d = document.createElement("div");
+	  d.innerHTML = dir;
+	  parent.appendChild(d);
+  }
+</script>
 
-  {% assign benchmark_dirs = site.pages | where_exp:"path", "path.dir.include? 'output/industry'" %}
-
-  <h2>benchmark_dirs</h2>
-  {{benchmark_dirs}}
-
-	<script>
-	  TESTER = document.getElementById('tester');
-	  Plotly.newPlot( TESTER, [{
-		  x: [1, 2, 3, 4, 5],
-		  y: [1, 2, 4, 8, 16] }], {
-			  margin: { t: 0 } } );
-	</script>
-
-</html>
+<script>
+  TESTER = document.getElementById('tester');
+  Plotly.newPlot( TESTER, [{
+	  x: [1, 2, 3, 4, 5],
+	  y: [1, 2, 4, 8, 16] }], {
+		  margin: { t: 0 } } );
+</script>
