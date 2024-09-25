@@ -12,6 +12,14 @@
 	<div id="tester" style="width:600px;height:250px;"></div>
   </body>
 
+  <h2>site.pages</h2>
+  {{site.pages}}
+
+  {% assign benchmark_dirs = site.pages | where_exp:"path", "path.dir.include? 'output/industry'" %}
+
+  <h2>benchmark_dirs</h2>
+  {{benchmark_dirs}}
+
 	<script>
 	  TESTER = document.getElementById('tester');
 	  Plotly.newPlot( TESTER, [{
