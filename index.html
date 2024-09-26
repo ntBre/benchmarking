@@ -18,9 +18,21 @@ layout: basic
   let unique_dirs = [...new Set(dirs)];
   let parent = document.getElementById("app");
   for (dir of unique_dirs) {
-	  let d = document.createElement("div");
-	  d.innerHTML = dir;
-	  parent.appendChild(d);
+	  let input = document.createElement("input");
+	  input.type = "checkbox";
+	  input.id = dir;
+	  input.name = dir;
+	  input.innerHTML = dir;
+
+	  let label = document.createElement("label");
+	  label.innerHTML = dir;
+	  label.for = dir;
+
+	  let br = document.createElement("br");
+
+	  parent.appendChild(input);
+	  parent.appendChild(label);
+	  parent.appendChild(br);
   }
 </script>
 
