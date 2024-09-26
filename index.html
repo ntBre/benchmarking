@@ -3,12 +3,99 @@ layout: basic
 ---
 {% assign static_files = site.static_files | where: "isdir", true %}
 
-<div id="tester"></div>
+<div id="dde"></div>
+<div id="rmsd"></div>
+<div id="tfd"></div>
 
 <h2>Available datasets</h2>
 <div id="app"></div>
 
 <script>
+  // fetch `filename` and return its contents as a string
+  async function fetchCsv(filename) {
+	  let res = await fetch(filename);
+	  let text = await res.text();
+	  return text;
+  }
+
+  async function fetchData(dir) {
+	  let dde = await fetchCsv(`/output/industry/${dir}/dde.csv`);
+	  let rmsd = await fetchCsv(`/output/industry/${dir}/rmsd.csv`);
+	  let tfd = await fetchCsv(`/output/industry/${dir}/tfd.csv`);
+	  return [dde, rmsd, tfd];
+  }
+
+  // just returns the data for now, might need the record IDs eventually
+  function parse_csv(str) {
+	  let lines = str.split(/\n/);
+	  let ret = [];
+	  for (const [i, line] of lines.entries()) {
+		  if (i == 0) { continue } // skip header
+		  let [rec_id, val] = line.split(',');
+		  if (val) { // skip empty lines
+			  ret.push(parseFloat(val));
+		  }
+	  }
+	  return ret;
+  }
+
+  const colors = ["blue", "orange", "red", "green"];
+
+  async function handleClick(self) {
+	  // this gives the directory name, eg 2.2-split-v1, and the current checked
+	  // status of its checkbox
+	  console.log(self.name, self.checked);
+	  selected.set(self.name, self.checked);
+
+	  // TODO plot selected
+	  let ddes = [];
+	  let rmsds = [];
+	  let tfds = [];
+	  for ([name, checked] of selected) {
+		  if (checked) {
+			  let [dde, rmsd, tfd] = await fetchData(name);
+			  let dde_vals = parse_csv(dde);
+			  // turning these into plotly traces, just dde for now
+			  ddes.push({
+				  x: dde_vals,
+				  xbins: { size: 30 / 16 },
+				  marker: {
+					  color: "transparent",
+					  line: {
+						  color: colors[ddes.length % colors.length],
+						  width: 2
+					  }
+				  },
+				  type: "histogram",
+				  name: name,
+			  });
+			  rmsds.push(rmsd);
+			  tfds.push(tfd);
+		  }
+	  }
+	  if (ddes.length > 0) {
+		  Plotly.newPlot( dde, ddes, dde_layout );
+	  }
+	  // console.log(dde.length, rmsd.length, tfd.length);
+  }
+
+  // initialize empty plots
+  let dde = document.getElementById("dde");
+  let dde_layout = {
+	  title: "DDE",
+	  xaxis: { range: [-15, 15] },
+	  barmode: "overlay"
+  };
+  Plotly.newPlot( dde, [{x: [], y: [] }], dde_layout );
+
+  let rmsd = document.getElementById("rmsd");
+  let rmsd_layout = {title: "RMSD"};
+  Plotly.newPlot( rmsd, [{x: [], y: [] }], rmsd_layout );
+
+  let tfd = document.getElementById("tfd");
+  let tfd_layout = {title: "TFD"};
+  Plotly.newPlot( tfd, [{x: [], y: [] }], tfd_layout );
+
   const PAGES = [
 {% for page in static_files %}
 	  "{{ page.path }}",
@@ -16,6 +103,10 @@ layout: basic
   ];
   let dirs = PAGES.map((x) => x.replace(/\/output\/industry\/([^/]+)\/.*$/, '$1'));
   let unique_dirs = [...new Set(dirs)];
+  const selected = new Map();
+  for (dir of unique_dirs) {
+	  selected.set(dir, false); // initially nothing is selected
+  }
   let parent = document.getElementById("app");
   for (dir of unique_dirs) {
 	  let input = document.createElement("input");
@@ -23,6 +114,7 @@ layout: basic
 	  input.id = dir;
 	  input.name = dir;
 	  input.innerHTML = dir;
+	  input.setAttribute("onclick", "handleClick(this)");
 
 	  let label = document.createElement("label");
 	  label.innerHTML = dir;
@@ -34,12 +126,4 @@ layout: basic
 	  parent.appendChild(label);
 	  parent.appendChild(br);
   }
-</script>
-
-<script>
-  TESTER = document.getElementById('tester');
-  Plotly.newPlot( TESTER, [{
-	  x: [1, 2, 3, 4, 5],
-	  y: [1, 2, 4, 8, 16] }], {
-		  margin: { t: 0 } } );
 </script>
