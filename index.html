@@ -19,9 +19,11 @@ layout: basic
   }
 
   async function fetchData(dir) {
-	  let dde = await fetchCsv(`/output/industry/${dir}/dde.csv`);
-	  let rmsd = await fetchCsv(`/output/industry/${dir}/rmsd.csv`);
-	  let tfd = await fetchCsv(`/output/industry/${dir}/tfd.csv`);
+	  // includes trailing slash so don't add another
+	  let base = `${window.location.pathname}output/industry/${dir}`
+	  let dde = await fetchCsv(`${base}/dde.csv`);
+	  let rmsd = await fetchCsv(`${base}/rmsd.csv`);
+	  let tfd = await fetchCsv(`${base}/tfd.csv`);
 	  return [dde, rmsd, tfd];
   }
 
