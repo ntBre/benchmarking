@@ -14,6 +14,7 @@ layout: basic
   <div class="plot" id="dde"></div>
   <div class="plot" id="rmsd"></div>
   <div class="plot" id="tfd"></div>
+  <div class="plot" id="icrmsd"></div>
 </div>
 
 <h2>Available datasets</h2>
@@ -23,6 +24,10 @@ layout: basic
   // fetch `filename` and return its contents as a string
   async function fetchCsv(filename) {
 	  let res = await fetch(filename);
+	  if (!res.ok) {
+		  console.log(`failed to retrieve ${filename}`);
+		  return null;
+	  }
 	  let text = await res.text();
 	  return text;
   }
@@ -33,7 +38,8 @@ layout: basic
 	  let dde = await fetchCsv(`${base}/dde.csv`);
 	  let rmsd = await fetchCsv(`${base}/rmsd.csv`);
 	  let tfd = await fetchCsv(`${base}/tfd.csv`);
-	  return [dde, rmsd, tfd];
+	  let icrmsd = await fetchCsv(`${base}/icrmsd.csv`);
+	  return [dde, rmsd, tfd, icrmsd];
   }
 
   // just returns the data for now, might need the record IDs eventually
@@ -48,6 +54,26 @@ layout: basic
 		  }
 	  }
 	  return ret;
+  }
+
+  function parse_icrmsd_csv(str) {
+	  let lines = str.split(/\n/);
+	  let bonds = [];
+	  let angles = [];
+	  let dihedrals = [];
+	  let impropers = [];
+	  for (const [i, line] of lines.entries()) {
+		  if (i == 0) { continue } // skip header
+		  let [rec_id, bond, angle, dihedral, improper] = line.split(',');
+		  if (bond) { // skip empty lines
+			  bonds.push(parseFloat(bond));
+			  angles.push(parseFloat(angle));
+			  dihedrals.push(parseFloat(dihedral));
+			  impropers.push(parseFloat(improper));
+		  }
+	  }
+
+	  return [bonds, angles, dihedrals, impropers];
   }
 
   // these are supposedly the default plotly colors from
@@ -78,9 +104,9 @@ layout: basic
 	  for ([name, checked] of selected) {
 		  if (checked) {
 			  let color = colors[ddes.length % colors.length];
-			  let [dde, rmsd, tfd] = await fetchData(name);
+			  let [dde, rmsd, tfd, icrmsd] = await fetchData(name);
+
 			  let dde_vals = parse_csv(dde);
-			  // turning these into plotly traces, just dde for now
 			  ddes.push({
 				  x: dde_vals,
 				  xbins: { size: 30 / 16 },
@@ -118,6 +144,14 @@ layout: basic
 					  color: color,
 				  }
 			  });
+
+			  // this field could be missing for old force fields
+			  if (!icrmsd) {
+				  continue;
+			  }
+
+			  let [bonds, angles, dihedrals, impropers] = parse_icrmsd_csv(icrmsd);
+			  // TODO assemble a data Array like in the dummy icrmsd below
 		  }
 	  }
 	  if (ddes.length > 0) {
@@ -154,6 +188,18 @@ layout: basic
   let tfd = document.getElementById("tfd");
   let tfd_layout = {title: "TFD"};
   Plotly.newPlot( tfd, [{x: [], y: [] }], tfd_layout );
+
+  let icrmsd = document.getElementById("icrmsd");
+  let icrmsd_layout = {
+	  title: "ICRMSD",
+	  grid: {rows: 2, columns: 2, pattern: "independent"},
+  };
+  Plotly.newPlot( icrmsd, [
+	  {x: [], y: [], xaxis: "x1", yaxis: "y1", title: "title"},
+	  {x: [], y: [], xaxis: "x2", yaxis: "y2", title: "title"},
+	  {x: [], y: [], xaxis: "x3", yaxis: "y3", title: "title"},
+	  {x: [], y: [], xaxis: "x4", yaxis: "y4", title: "title"}
+  ], icrmsd_layout );
 
   const PAGES = [
 {% for page in static_files %}
