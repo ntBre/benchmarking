@@ -41,7 +41,20 @@ layout: basic
 	  return ret;
   }
 
-  const colors = ["blue", "orange", "red", "green"];
+  // these are supposedly the default plotly colors from
+  // https://stackoverflow.com/a/69355251/12935407
+  let colors = [
+	  "#1f77b4",
+	  "#ff7f0e",
+	  "#2ca02c",
+	  "#d62728",
+	  "#9467bd",
+	  "#8c564b",
+	  "#e377c2",
+	  "#7f7f7f",
+	  "#bcbd22",
+	  "#17becf",
+  ];
 
   async function handleClick(self) {
 	  // this gives the directory name, eg 2.2-split-v1, and the current checked
@@ -55,6 +68,7 @@ layout: basic
 	  let tfds = [];
 	  for ([name, checked] of selected) {
 		  if (checked) {
+			  let color = colors[ddes.length % colors.length];
 			  let [dde, rmsd, tfd] = await fetchData(name);
 			  let dde_vals = parse_csv(dde);
 			  // turning these into plotly traces, just dde for now
@@ -64,21 +78,55 @@ layout: basic
 				  marker: {
 					  color: "transparent",
 					  line: {
-						  color: colors[ddes.length % colors.length],
+						  color: color,
 						  width: 2
 					  }
 				  },
 				  type: "histogram",
 				  name: name,
 			  });
-			  rmsds.push(rmsd);
-			  tfds.push(tfd);
+
+			  let rmsd_vals = parse_csv(rmsd);
+			  let [rx, ry] = ecdf(rmsd_vals);
+			  rmsds.push({
+				  x: rx,
+				  y: ry,
+				  mode: "lines",
+				  name: name,
+				  line: {
+					  color: color,
+				  }
+			  });
+
+			  let tfd_vals = parse_csv(tfd);
+			  let [tx, ty] = ecdf(tfd_vals);
+			  tfds.push({
+				  x: tx,
+				  y: ty,
+				  mode: "lines",
+				  name: name,
+				  line: {
+					  color: color,
+				  }
+			  });
 		  }
 	  }
 	  if (ddes.length > 0) {
 		  Plotly.newPlot( dde, ddes, dde_layout );
 	  }
+	  if (rmsds.length > 0) {
+		  Plotly.newPlot( rmsd, rmsds, rmsd_layout );
+	  }
+	  if (tfds.length > 0) {
+		  Plotly.newPlot( tfd, tfds, tfd_layout );
+	  }
 	  // console.log(dde.length, rmsd.length, tfd.length);
+  }
+
+  // an ecdf is just the fraction of entries less than a given x value
+  function ecdf(x) {
+	  let sx = x.toSorted((a, b) => a - b);
+	  return [sx, sx.map((_elt, idx) => (idx + 1) / sx.length)];
   }
 
   // initialize empty plots
