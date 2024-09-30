@@ -3,9 +3,18 @@ layout: basic
 ---
 {% assign static_files = site.static_files | where: "isdir", true %}
 
-<div id="dde"></div>
-<div id="rmsd"></div>
-<div id="tfd"></div>
+<style>
+  .plot {
+	  max-width: 50%;
+	  display: inline-block;
+  }
+</style>
+
+<div id="plot-area">
+  <div class="plot" id="dde"></div>
+  <div class="plot" id="rmsd"></div>
+  <div class="plot" id="tfd"></div>
+</div>
 
 <h2>Available datasets</h2>
 <div id="app"></div>
