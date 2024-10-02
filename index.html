@@ -14,7 +14,10 @@ layout: basic
   <div class="plot" id="dde"></div>
   <div class="plot" id="rmsd"></div>
   <div class="plot" id="tfd"></div>
-  <div class="plot" id="icrmsd"></div>
+  <div class="plot" id="bonds"></div>
+  <div class="plot" id="angles"></div>
+  <div class="plot" id="dihedrals"></div>
+  <div class="plot" id="impropers"></div>
 </div>
 
 <h2>Available datasets</h2>
@@ -97,60 +100,107 @@ layout: basic
 	  console.log(self.name, self.checked);
 	  selected.set(self.name, self.checked);
 
-	  // TODO plot selected
 	  let ddes = [];
 	  let rmsds = [];
 	  let tfds = [];
+	  // icrmsds
+	  let bonds = [];
+	  let angles = [];
+	  let dihedrals = [];
+	  let impropers = [];
 	  for ([name, checked] of selected) {
 		  if (checked) {
 			  let color = colors[ddes.length % colors.length];
 			  let [dde, rmsd, tfd, icrmsd] = await fetchData(name);
 
-			  let dde_vals = parse_csv(dde);
-			  ddes.push({
-				  x: dde_vals,
-				  xbins: { size: 30 / 16 },
-				  marker: {
-					  color: "transparent",
-					  line: {
-						  color: color,
-						  width: 2
-					  }
-				  },
-				  type: "histogram",
-				  name: name,
-			  });
-
-			  let rmsd_vals = parse_csv(rmsd);
-			  let [rx, ry] = ecdf(rmsd_vals);
-			  rmsds.push({
-				  x: rx,
-				  y: ry,
-				  mode: "lines",
-				  name: name,
-				  line: {
-					  color: color,
-				  }
-			  });
-
-			  let tfd_vals = parse_csv(tfd);
-			  let [tx, ty] = ecdf(tfd_vals);
-			  tfds.push({
-				  x: tx,
-				  y: ty,
-				  mode: "lines",
-				  name: name,
-				  line: {
-					  color: color,
-				  }
-			  });
-
-			  // this field could be missing for old force fields
-			  if (!icrmsd) {
-				  continue;
+			  if (dde) {
+				  let dde_vals = parse_csv(dde);
+				  ddes.push({
+					  x: dde_vals,
+					  nbinsx: 30,
+					  xbins: { size: 30 / 16 },
+					  marker: {
+						  color: "transparent",
+						  line: {
+							  color: color,
+							  width: 2
+						  }
+					  },
+					  type: "histogram",
+					  bingroup: '1',
+					  name: name,
+				  });
 			  }
 
-			  let [bonds, angles, dihedrals, impropers] = parse_icrmsd_csv(icrmsd);
+			  if (rmsd) {
+				  let rmsd_vals = parse_csv(rmsd);
+				  let [rx, ry] = ecdf(rmsd_vals);
+				  rmsds.push({
+					  x: rx,
+					  y: ry,
+					  mode: "lines",
+					  name: name,
+					  line: {
+						  color: color,
+					  }
+				  });
+			  }
+
+			  if (tfd) {
+				  let tfd_vals = parse_csv(tfd);
+				  let [tx, ty] = ecdf(tfd_vals);
+				  tfds.push({
+					  x: tx,
+					  y: ty,
+					  mode: "lines",
+					  name: name,
+					  line: {
+						  color: color,
+					  }
+				  });
+			  }
+
+			  // this field could be missing for old force fields
+			  if (icrmsd) {
+				  let [b, a, d, i] = parse_icrmsd_csv(icrmsd);
+				  bonds.push({
+					  x: name,
+					  y: b,
+					  type: 'box',
+					  marker: {color: color},
+					  xaxis: "x1",
+					  yaxis: "y1",
+					  name: name,
+				  });
+				  angles.push({
+					  x: name,
+					  y: a,
+					  type: 'box',
+					  marker: {color: color},
+					  xaxis: "x2",
+					  yaxis: "y2",
+					  name: name,
+				  });
+				  dihedrals.push({
+					  x: name,
+					  y: d,
+					  type: 'box',
+					  marker: {color: color},
+					  xaxis: "x3",
+					  yaxis: "y3",
+					  name: name,
+				  });
+				  impropers.push({
+					  x: name,
+					  y: i,
+					  type: 'box',
+					  marker: {color: color},
+					  xaxis: "x4",
+					  yaxis: "y4",
+					  name: name,
+				  });
+			  }
+
 			  // TODO assemble a data Array like in the dummy icrmsd below
 		  }
 	  }
@@ -163,7 +213,18 @@ layout: basic
 	  if (tfds.length > 0) {
 		  Plotly.newPlot( tfd, tfds, tfd_layout );
 	  }
-	  // console.log(dde.length, rmsd.length, tfd.length);
+	  if (bonds.length > 0) {
+		  Plotly.newPlot(BONDS, bonds, {title: "Bonds"});
+	  }
+	  if (angles.length > 0) {
+		  Plotly.newPlot(ANGLES, angles, {title: "Angles"});
+	  }
+	  if (dihedrals.length > 0) {
+		  Plotly.newPlot(DIHEDRALS, dihedrals, {title: "Dihedrals"});
+	  }
+	  if (impropers.length > 0) {
+		  Plotly.newPlot(IMPROPERS, impropers, {title: "Impropers"});
+	  }
   }
 
   // an ecdf is just the fraction of entries less than a given x value
@@ -189,17 +250,14 @@ layout: basic
   let tfd_layout = {title: "TFD"};
   Plotly.newPlot( tfd, [{x: [], y: [] }], tfd_layout );
 
-  let icrmsd = document.getElementById("icrmsd");
-  let icrmsd_layout = {
-	  title: "ICRMSD",
-	  grid: {rows: 2, columns: 2, pattern: "independent"},
-  };
-  Plotly.newPlot( icrmsd, [
-	  {x: [], y: [], xaxis: "x1", yaxis: "y1", title: "title"},
-	  {x: [], y: [], xaxis: "x2", yaxis: "y2", title: "title"},
-	  {x: [], y: [], xaxis: "x3", yaxis: "y3", title: "title"},
-	  {x: [], y: [], xaxis: "x4", yaxis: "y4", title: "title"}
-  ], icrmsd_layout );
+  let BONDS = document.getElementById("bonds");
+  let ANGLES = document.getElementById("angles");
+  let DIHEDRALS = document.getElementById("dihedrals");
+  let IMPROPERS = document.getElementById("impropers");
+  Plotly.newPlot(BONDS, [{x: [], y: [] }], {title: "Bonds"});
+  Plotly.newPlot(ANGLES, [{x: [], y: [] }], {title: "Angles"});
+  Plotly.newPlot(DIHEDRALS, [{x: [], y: [] }], {title: "Dihedrals"});
+  Plotly.newPlot(IMPROPERS, [{x: [], y: [] }], {title: "Impropers"});
 
   const PAGES = [
 {% for page in static_files %}
